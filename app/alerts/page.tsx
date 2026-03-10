@@ -62,11 +62,11 @@ export default function AlertsPage() {
         });
 
         // High-temperature controllers → Warning alerts
-        controllers.filter(c => c.status === 'warning' && parseFloat(c.temperature) > 55).slice(0, 6).forEach((c, i) => {
+        controllers.filter(c => c.status === 'warning').slice(0, 8).forEach((c, i) => {
             items.push({
                 id: `ALT-${String(seq++).padStart(3, '0')}`,
-                title: `อุณหภูมิบอร์ดควบคุมสูงผิดปกติ — ${c.id}`,
-                description: `อุณหภูมิบอร์ดควบคุม ${c.id} สูงถึง ${c.temperature}°C (เกณฑ์เตือน 55°C) ควรตรวจสอบระบบระบายความร้อน — แรงดัน ${c.voltage}V กำลังไฟ ${c.power}kW`,
+                title: `อุณหภูมิบอร์ดควบคุมสูง — ${c.id} (${c.temperature}°C)`,
+                description: `อุณหภูมิบอร์ดควบคุม ${c.id} อยู่ที่ ${c.temperature}°C ควรเฝ้าระวัง — แรงดัน ${c.voltage}V กำลังไฟ ${c.power}kW (${c.zone})`,
                 severity: 'warning',
                 status: 'active',
                 location: c.zone,
@@ -77,23 +77,7 @@ export default function AlertsPage() {
             });
         });
 
-        // Warning controllers (low voltage) → Warning alerts  
-        controllers.filter(c => c.status === 'warning' && parseFloat(c.voltage) < 210).slice(0, 3).forEach((c, i) => {
-            items.push({
-                id: `ALT-${String(seq++).padStart(3, '0')}`,
-                title: `แรงดันไฟฟ้าต่ำกว่าเกณฑ์ — ${c.id}`,
-                description: `แรงดันไฟฟ้าที่ ${c.id} ลดลงเหลือ ${c.voltage}V (เกณฑ์ต่ำสุด 210V) อาจส่งผลให้โคมไฟสว่างไม่เต็มประสิทธิภาพ`,
-                severity: 'warning',
-                status: 'active',
-                location: c.zone,
-                zone: `Zone ${c.zoneId}`,
-                timestamp: `10 มี.ค. 2026 — ${String(6 - i).padStart(2, '0')}:15`,
-                category: 'Voltage',
-                poleId: c.id,
-            });
-        });
-
-        // Gateway warnings
+        // Off controllers → Info alerts
         gateways.filter(g => g.status === 'warning' || g.signal < 60).slice(0, 2).forEach((g, i) => {
             items.push({
                 id: `ALT-${String(seq++).padStart(3, '0')}`,
