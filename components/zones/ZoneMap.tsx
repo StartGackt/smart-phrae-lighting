@@ -66,7 +66,7 @@ const ZoneMap = ({
                     <CircleMarker
                         key={c.id}
                         center={[c.lat, c.lng]}
-                        radius={5}
+                        radius={3}
                         pathOptions={{
                             color: '#fff', weight: 1.5,
                             fillColor: color, fillOpacity: c.isOn ? 0.9 : 0.4,
@@ -116,7 +116,7 @@ const ZoneMap = ({
                     {g.isOn && (
                         <Circle
                             center={[g.lat, g.lng]}
-                            radius={200}
+                            radius={150}
                             pathOptions={{
                                 color: '#2563eb', fillColor: '#2563eb',
                                 fillOpacity: 0.04, weight: 1, dashArray: '6 4',
