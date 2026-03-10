@@ -43,9 +43,9 @@ export default function ReportsPage() {
     const costSavings = (parseFloat(totalSavingsKw) * 4.5).toFixed(0); // ~4.5 baht per kWh
 
     const headlineCards = [
-        { icon: Zap, label: 'พลังงานที่ประหยัดได้', value: `${totalSavingsKw} kW`, sub: `(-${savingsPercent}%)`, subColor: '#059669', desc: `จากเสาไฟ ${controllers.length} ต้น ในระบบ`, gradient: 'linear-gradient(135deg, #2563eb, #1d4ed8)' },
-        { icon: Leaf, label: 'ลดปริมาณคาร์บอน', value: carbonOffset, sub: 'ตัน', subColor: '#0f172a', desc: `CO₂ ลดลงเทียบเท่าป่าไม้ ${Math.round(parseFloat(carbonOffset) * 42)} ต้น`, gradient: 'linear-gradient(135deg, #059669, #047857)' },
-        { icon: DollarSign, label: 'ประหยัดค่าไฟ', value: `฿${parseInt(costSavings).toLocaleString()}`, sub: 'เดือนนี้', subColor: '#059669', desc: 'ประหยัดค่าไฟฟ้ารวมในเดือนนี้', gradient: 'linear-gradient(135deg, #d97706, #b45309)' },
+        { icon: Zap, label: 'พลังงานที่ได้', value: `${totalSavingsKw} kW`, sub: `(-${savingsPercent}%)`, subColor: '#059669', desc: `จากเสาไฟ ${controllers.length} ต้น ในระบบ`, gradient: 'linear-gradient(135deg, #2563eb, #1d4ed8)' },
+        { icon: Leaf, label: 'ปริมาณคาร์บอน', value: carbonOffset, sub: 'ตัน', subColor: '#0f172a', desc: `CO₂ ลดลงเทียบเท่าป่าไม้ ${Math.round(parseFloat(carbonOffset) * 42)} ต้น`, gradient: 'linear-gradient(135deg, #059669, #047857)' },
+        { icon: DollarSign, label: 'ค่าไฟ', value: `฿${parseInt(costSavings).toLocaleString()}`, sub: 'เดือนนี้', subColor: '#059669', desc: 'ค่าไฟฟ้ารวมในเดือนนี้', gradient: 'linear-gradient(135deg, #d97706, #b45309)' },
     ];
 
     // Generate per-month bar chart data based on current power usage

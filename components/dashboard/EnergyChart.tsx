@@ -110,7 +110,7 @@ const EnergyChart = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
                 <div>
                     <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                        สรุปการประหยัดพลังงาน
+                        การใช้พลังงาน
                     </h3>
                     <p style={{ fontSize: '13px', fontWeight: 500, color: '#94a3b8', margin: '4px 0 0' }}>
                         ปริมาณการใช้ไฟราย{timeframe === 'daily' ? 'วัน' : timeframe === 'weekly' ? 'สัปดาห์' : timeframe === 'monthly' ? 'เดือน' : 'ปี'}เทียบกับระบบลดแสงอัจฉริยะ
@@ -194,7 +194,7 @@ const EnergyChart = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '24px' }}>
                 <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '20px' }}>
                     <p style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.08em', margin: '0 0 6px' }}>
-                        ประหยัดไฟ{summary.label}
+                       ไฟ{summary.label}
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontSize: '28px', fontWeight: 800, color: '#2563eb', letterSpacing: '-0.02em' }}>{summary.savings}</span>
