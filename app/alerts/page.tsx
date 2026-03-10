@@ -7,6 +7,7 @@ import {
     Filter, Search, MapPin, Clock, ChevronRight, ArrowUpRight,
     Zap, WifiOff, Thermometer, ShieldAlert
 } from 'lucide-react';
+import { useDevices } from '@/contexts/DeviceContext';
 
 type Severity = 'critical' | 'warning' | 'info';
 type AlertStatus = 'active' | 'acknowledged' | 'resolved';
@@ -24,19 +25,6 @@ interface Alert {
     poleId?: string;
 }
 
-const initialAlerts: Alert[] = [
-    { id: 'ALT-001', title: 'ไฟดับต่อเนื่อง — Node F128', description: 'ตรวจพบเสาไฟหมายเลข F128 ไม่ตอบสนอง 3 ชั่วโมง อาจเกิดจากสายไฟขาดหรือฟิวส์ขาด', severity: 'critical', status: 'active', location: 'ถ.ยันตรกิจโกศล', zone: 'Zone 1', timestamp: '10 มี.ค. 2026 — 09:15', category: 'Power Outage', poleId: 'P1-3' },
-    { id: 'ALT-002', title: 'แรงดันไฟฟ้าเกินเกณฑ์', description: 'แรงดันไฟฟ้าที่ Node C045 พุ่งสูงถึง 248V (เกณฑ์สูงสุด 240V) อาจทำให้อุปกรณ์เสียหาย', severity: 'critical', status: 'active', location: 'ถ.เจริญเมือง', zone: 'Zone 3', timestamp: '10 มี.ค. 2026 — 08:42', category: 'Voltage Surge', poleId: 'P3-1' },
-    { id: 'ALT-003', title: 'อุณหภูมิบอร์ดควบคุมสูงผิดปกติ', description: 'อุณหภูมิบอร์ดควบคุม Node A012 สูงถึง 68°C (เกณฑ์เตือน 60°C) ควรตรวจสอบระบบระบายความร้อน', severity: 'warning', status: 'active', location: 'ถ.พระร่วง', zone: 'Zone 6', timestamp: '10 มี.ค. 2026 — 07:30', category: 'Temperature', poleId: 'P6-2' },
-    { id: 'ALT-004', title: 'Gateway GW-04 สัญญาณอ่อน', description: 'LoRa Gateway บริเวณช่อแฮมีสัญญาณอ่อนลง 40% จากค่าปกติ อาจเกี่ยวกับสภาพอากาศ', severity: 'warning', status: 'acknowledged', location: 'ถ.ช่อแฮ', zone: 'Zone 28', timestamp: '10 มี.ค. 2026 — 06:15', category: 'Gateway' },
-    { id: 'ALT-005', title: 'Node ขาดการเชื่อมต่อ 30 นาที', description: 'Node B087 ขาดการรายงานข้อมูลเกิน 30 นาที กำลังพยายามเชื่อมต่อซ้ำอัตโนมัติ', severity: 'warning', status: 'active', location: 'ถ.ชุมพล', zone: 'Zone 7', timestamp: '10 มี.ค. 2026 — 05:48', category: 'Connectivity', poleId: 'P7-4' },
-    { id: 'ALT-006', title: 'การบำรุงรักษาตามกำหนด', description: 'โซน 14 (ถ.แพร่-สูงเม่น) ครบกำหนดการตรวจสอบบำรุงรักษาประจำไตรมาส', severity: 'info', status: 'active', location: 'ถ.แพร่-สูงเม่น', zone: 'Zone 14', timestamp: '10 มี.ค. 2026 — 00:00', category: 'Maintenance' },
-    { id: 'ALT-007', title: 'อัปเดตเฟิร์มแวร์สำเร็จ', description: 'อุปกรณ์ 45 จุดในโซน 8 ได้รับการอัปเดตเฟิร์มแวร์เวอร์ชัน 3.2.1 เรียบร้อย', severity: 'info', status: 'resolved', location: 'ถ.ราษฎรบำรุง', zone: 'Zone 8', timestamp: '09 มี.ค. 2026 — 22:00', category: 'System Update' },
-    { id: 'ALT-008', title: 'การใช้พลังงานสูงผิดปกติ', description: 'โซน 2 มีการใช้พลังงานสูงกว่าค่าเฉลี่ย 35% ในช่วง 2 ชั่วโมงที่ผ่านมา', severity: 'warning', status: 'active', location: 'ถ.ยันตรกิจโกศล (ใต้)', zone: 'Zone 2', timestamp: '10 มี.ค. 2026 — 04:20', category: 'Energy' },
-    { id: 'ALT-009', title: 'สภาพอากาศแจ้งเตือน — ฝนตกหนัก', description: 'กรมอุตุนิยมวิทยาแจ้งเตือนฝนตกหนักในพื้นที่เมืองแพร่ ระวังน้ำท่วมขัง', severity: 'info', status: 'active', location: 'ทั่วพื้นที่เมืองแพร่', zone: 'All', timestamp: '10 มี.ค. 2026 — 03:00', category: 'Weather' },
-    { id: 'ALT-010', title: 'เสาไฟเอียง — ตรวจพบจากเซ็นเซอร์', description: 'เซ็นเซอร์ Tilt ที่ Node D056 ตรวจพบเสาเอียง 12° จากแนวตั้ง ต้องส่งช่างตรวจสอบ', severity: 'critical', status: 'active', location: 'ถ.คำลือ', zone: 'Zone 9', timestamp: '10 มี.ค. 2026 — 02:35', category: 'Physical Damage', poleId: 'P9-1' },
-];
-
 const severityConfig: Record<Severity, { bg: string; fg: string; badgeBg: string; badgeFg: string; icon: React.ComponentType<any>; label: string }> = {
     critical: { bg: '#fef2f2', fg: '#dc2626', badgeBg: '#fee2e2', badgeFg: '#b91c1c', icon: AlertCircle, label: 'วิกฤต' },
     warning: { bg: '#fffbeb', fg: '#d97706', badgeBg: '#fef3c7', badgeFg: '#b45309', icon: AlertTriangle, label: 'เตือน' },
@@ -50,7 +38,107 @@ const statusConfig: Record<AlertStatus, { label: string; color: string; bg: stri
 };
 
 export default function AlertsPage() {
-    const [alerts, setAlerts] = React.useState(initialAlerts);
+    const { controllers, gateways, zones } = useDevices();
+
+    // Generate alerts from real device data
+    const generatedAlerts = React.useMemo<Alert[]>(() => {
+        const items: Alert[] = [];
+        let seq = 1;
+
+        // Fault controllers → Critical alerts
+        controllers.filter(c => c.status === 'fault').forEach((c, i) => {
+            items.push({
+                id: `ALT-${String(seq++).padStart(3, '0')}`,
+                title: `ไฟดับต่อเนื่อง — ${c.id}`,
+                description: `ตรวจพบเสาไฟ ${c.id} (${c.zone}) ไม่ตอบสนอง สถานะ Fault — แรงดัน ${c.voltage}V, อุณหภูมิ ${c.temperature}°C`,
+                severity: 'critical',
+                status: 'active',
+                location: c.zone,
+                zone: `Zone ${c.zoneId}`,
+                timestamp: `10 มี.ค. 2026 — ${String(9 - (i % 8)).padStart(2, '0')}:${String(15 + i * 7).padStart(2, '0').slice(0, 2)}`,
+                category: 'Power Outage',
+                poleId: c.id,
+            });
+        });
+
+        // High-temperature controllers → Warning alerts
+        controllers.filter(c => c.status === 'warning' && parseFloat(c.temperature) > 55).slice(0, 6).forEach((c, i) => {
+            items.push({
+                id: `ALT-${String(seq++).padStart(3, '0')}`,
+                title: `อุณหภูมิบอร์ดควบคุมสูงผิดปกติ — ${c.id}`,
+                description: `อุณหภูมิบอร์ดควบคุม ${c.id} สูงถึง ${c.temperature}°C (เกณฑ์เตือน 55°C) ควรตรวจสอบระบบระบายความร้อน — แรงดัน ${c.voltage}V กำลังไฟ ${c.power}kW`,
+                severity: 'warning',
+                status: 'active',
+                location: c.zone,
+                zone: `Zone ${c.zoneId}`,
+                timestamp: `10 มี.ค. 2026 — ${String(7 - (i % 6)).padStart(2, '0')}:${String(30 + i * 5).padStart(2, '0').slice(0, 2)}`,
+                category: 'Temperature',
+                poleId: c.id,
+            });
+        });
+
+        // Warning controllers (low voltage) → Warning alerts  
+        controllers.filter(c => c.status === 'warning' && parseFloat(c.voltage) < 210).slice(0, 3).forEach((c, i) => {
+            items.push({
+                id: `ALT-${String(seq++).padStart(3, '0')}`,
+                title: `แรงดันไฟฟ้าต่ำกว่าเกณฑ์ — ${c.id}`,
+                description: `แรงดันไฟฟ้าที่ ${c.id} ลดลงเหลือ ${c.voltage}V (เกณฑ์ต่ำสุด 210V) อาจส่งผลให้โคมไฟสว่างไม่เต็มประสิทธิภาพ`,
+                severity: 'warning',
+                status: 'active',
+                location: c.zone,
+                zone: `Zone ${c.zoneId}`,
+                timestamp: `10 มี.ค. 2026 — ${String(6 - i).padStart(2, '0')}:15`,
+                category: 'Voltage',
+                poleId: c.id,
+            });
+        });
+
+        // Gateway warnings
+        gateways.filter(g => g.status === 'warning' || g.signal < 60).slice(0, 2).forEach((g, i) => {
+            items.push({
+                id: `ALT-${String(seq++).padStart(3, '0')}`,
+                title: `Gateway ${g.name} สัญญาณอ่อน (${g.signal}%)`,
+                description: `LoRa Gateway ${g.name} บริเวณ${g.location} มีสัญญาณ ${g.signal}% ครอบคลุม ${g.coverage} เสาไฟ อาจเกิดจากสภาพอากาศหรือสิ่งกีดขวาง`,
+                severity: 'warning',
+                status: 'acknowledged',
+                location: g.location,
+                zone: `Zone ${g.zoneIds.join(', ')}`,
+                timestamp: `10 มี.ค. 2026 — 06:${String(15 + i * 20).padStart(2, '0')}`,
+                category: 'Gateway',
+            });
+        });
+
+        // Info alerts (system-level)
+        items.push({
+            id: `ALT-${String(seq++).padStart(3, '0')}`,
+            title: 'สรุปสถานะระบบประจำวัน',
+            description: `ระบบมีเสาไฟทั้งหมด ${controllers.length} ต้น, เปิดอยู่ ${controllers.filter(c => c.isOn).length} ต้น, Gateway ${gateways.length} ชุด — พลังงานรวม ${controllers.filter(c => c.isOn).reduce((s, c) => s + parseFloat(c.power), 0).toFixed(1)} kW`,
+            severity: 'info',
+            status: 'active',
+            location: 'ทั่วพื้นที่เมืองแพร่',
+            zone: `All ${zones.length} Zones`,
+            timestamp: '10 มี.ค. 2026 — 06:00',
+            category: 'System',
+        });
+
+        items.push({
+            id: `ALT-${String(seq++).padStart(3, '0')}`,
+            title: `Firmware Update พร้อมติดตั้ง v2.4.0`,
+            description: `มีเฟิร์มแวร์เวอร์ชัน 2.4.0 พร้อมอัปเดตสำหรับอุปกรณ์ ${controllers.length} ชุด — แก้ไขปัญหาการรายงานค่า Dimming`,
+            severity: 'info',
+            status: 'active',
+            location: 'ระบบรวม',
+            zone: 'All',
+            timestamp: '09 มี.ค. 2026 — 22:00',
+            category: 'System Update',
+        });
+
+        return items;
+    }, [controllers, gateways, zones]);
+
+    const [alerts, setAlerts] = React.useState<Alert[]>([]);
+    React.useEffect(() => { setAlerts(generatedAlerts); }, [generatedAlerts]);
+
     const [filterSeverity, setFilterSeverity] = React.useState<Severity | 'all'>('all');
     const [filterStatus, setFilterStatus] = React.useState<AlertStatus | 'all'>('all');
     const [expandedAlert, setExpandedAlert] = React.useState<string | null>(null);

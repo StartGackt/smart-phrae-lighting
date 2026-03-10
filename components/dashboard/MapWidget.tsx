@@ -2,17 +2,37 @@
 
 import React from 'react';
 import { Maximize2, Navigation } from 'lucide-react';
-
-const zones = [
-    { x: '28%', y: '30%', status: 'online', label: 'Zone A' },
-    { x: '65%', y: '50%', status: 'fault', label: 'Zone B' },
-    { x: '50%', y: '70%', status: 'online', label: 'Zone C' },
-    { x: '22%', y: '60%', status: 'online', label: 'Zone D' },
-    { x: '75%', y: '25%', status: 'online', label: 'Zone E' },
-    { x: '40%', y: '45%', status: 'online', label: 'Zone F' },
-];
+import { useDevices } from '@/contexts/DeviceContext';
+import Link from 'next/link';
 
 const MapWidget = () => {
+    const { controllers, gateways, zones } = useDevices();
+
+    const onlineCount = controllers.filter(c => c.isOn && c.status !== 'fault').length;
+    const faultCount = controllers.filter(c => c.status === 'fault').length;
+    const warningCount = controllers.filter(c => c.status === 'warning').length;
+    const gatewayOnline = gateways.filter(g => g.isOn).length;
+
+    // Take first 8 zones for mini-map display
+    const displayZones = zones.slice(0, 8).map(z => {
+        const zControllers = controllers.filter(c => c.zoneId === z.id);
+        const hasFault = zControllers.some(c => c.status === 'fault');
+        const hasWarning = zControllers.some(c => c.status === 'warning');
+        const allOn = zControllers.filter(c => c.status !== 'fault').every(c => c.isOn);
+        return {
+            ...z,
+            status: hasFault ? 'fault' : hasWarning ? 'warning' : allOn ? 'online' : 'partial',
+        };
+    });
+
+    // Distribute zones on the widget
+    const positions = [
+        { x: '28%', y: '30%' }, { x: '65%', y: '50%' },
+        { x: '50%', y: '70%' }, { x: '22%', y: '60%' },
+        { x: '75%', y: '25%' }, { x: '40%', y: '45%' },
+        { x: '82%', y: '65%' }, { x: '15%', y: '80%' },
+    ];
+
     return (
         <div
             style={{
@@ -29,17 +49,19 @@ const MapWidget = () => {
             <div style={{ padding: '28px 28px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                     <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>City Overview</h3>
-                    <p style={{ fontSize: '13px', fontWeight: 500, color: '#94a3b8', margin: '4px 0 0' }}>Phrae Municipality Map</p>
+                    <p style={{ fontSize: '13px', fontWeight: 500, color: '#94a3b8', margin: '4px 0 0' }}>
+                        {zones.length} Zones • {controllers.length} Controllers
+                    </p>
                 </div>
-                <button
+                <Link href="/zones"
                     style={{
                         width: '36px', height: '36px', borderRadius: '10px', border: '1px solid #f1f5f9',
                         background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: '#94a3b8', cursor: 'pointer', transition: 'all 0.2s',
+                        color: '#94a3b8', cursor: 'pointer', transition: 'all 0.2s', textDecoration: 'none',
                     }}
                 >
                     <Maximize2 size={14} />
-                </button>
+                </Link>
             </div>
 
             {/* Map Area */}
@@ -70,69 +92,64 @@ const MapWidget = () => {
                 </svg>
 
                 {/* Zone Markers */}
-                {zones.map((zone, i) => (
-                    <div
-                        key={i}
-                        style={{
-                            position: 'absolute',
-                            left: zone.x,
-                            top: zone.y,
-                            transform: 'translate(-50%, -50%)',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        {zone.status === 'fault' && (
+                {displayZones.map((zone, i) => {
+                    const pos = positions[i] || { x: '50%', y: '50%' };
+                    const statusColor = zone.status === 'fault' ? '#ef4444'
+                        : zone.status === 'warning' ? '#f59e0b'
+                            : zone.status === 'online' ? '#22c55e'
+                                : '#94a3b8';
+                    return (
+                        <div key={zone.id}
+                            style={{
+                                position: 'absolute', left: pos.x, top: pos.y,
+                                transform: 'translate(-50%, -50%)', cursor: 'pointer',
+                            }}
+                        >
+                            {zone.status === 'fault' && (
+                                <div style={{
+                                    position: 'absolute',
+                                    width: '24px', height: '24px', borderRadius: '50%',
+                                    background: 'rgba(239, 68, 68, 0.2)',
+                                    animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+                                    left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
+                                }} />
+                            )}
                             <div style={{
-                                position: 'absolute',
-                                width: '24px', height: '24px', borderRadius: '50%',
-                                background: 'rgba(239, 68, 68, 0.2)',
-                                animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
-                                left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
+                                width: '12px', height: '12px', borderRadius: '50%',
+                                background: statusColor,
+                                border: '3px solid #fff',
+                                boxShadow: `0 2px 8px ${statusColor}60`,
+                                position: 'relative', zIndex: 2,
                             }} />
-                        )}
-                        <div style={{
-                            width: '12px', height: '12px', borderRadius: '50%',
-                            background: zone.status === 'online' ? '#22c55e' : '#ef4444',
-                            border: '3px solid #fff',
-                            boxShadow: zone.status === 'online'
-                                ? '0 2px 8px rgba(34,197,94,0.4)'
-                                : '0 2px 8px rgba(239,68,68,0.4)',
-                            position: 'relative',
-                            zIndex: 2,
-                        }} />
-                    </div>
-                ))}
+                        </div>
+                    );
+                })}
 
                 {/* Bottom Overlay */}
                 <div
                     style={{
                         position: 'absolute',
-                        bottom: '12px',
-                        left: '12px',
-                        right: '12px',
+                        bottom: '12px', left: '12px', right: '12px',
                         background: 'rgba(255,255,255,0.92)',
                         backdropFilter: 'blur(12px)',
-                        borderRadius: '12px',
-                        padding: '12px 16px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
+                        borderRadius: '12px', padding: '12px 16px',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
                     }}
                 >
-                    <div>
-                        <p style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.08em', margin: 0 }}>
-                            Current Focus
-                        </p>
-                        <p style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: '2px 0 0' }}>Central Zone A</p>
+                    <div style={{ display: 'flex', gap: '14px', fontSize: '11px', fontWeight: 600 }}>
+                        <span style={{ color: '#22c55e' }}>● {onlineCount} Online</span>
+                        <span style={{ color: '#f59e0b' }}>● {warningCount} Warning</span>
+                        <span style={{ color: '#ef4444' }}>● {faultCount} Fault</span>
                     </div>
-                    <button style={{
+                    <Link href="/zones" style={{
                         fontSize: '12px', fontWeight: 600, color: '#2563eb', background: 'none',
                         border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px',
+                        textDecoration: 'none',
                     }}>
                         <Navigation size={12} />
-                        Full Map View
-                    </button>
+                        Full Map
+                    </Link>
                 </div>
             </div>
 

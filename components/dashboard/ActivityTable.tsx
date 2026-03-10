@@ -1,15 +1,8 @@
 "use client";
 
 import React from 'react';
-import { CheckCircle2, AlertCircle, Clock, Info } from 'lucide-react';
-
-const activities = [
-    { id: 1, event: 'Node #F128 Dimming Set', location: 'Yantrakit Koson Rd.', status: 'Success', time: '14:20:05', type: 'success' },
-    { id: 2, event: 'Device Offline Detected', location: 'Charoen Muang Rd.', status: 'Critical', time: '13:15:22', type: 'danger' },
-    { id: 3, event: 'Power Surge Alert', location: 'Phra Ruang Road', status: 'Warning', time: '12:45:10', type: 'warning' },
-    { id: 4, event: 'Schedule Update: Festive', location: 'System Wide', status: 'Info', time: '10:00:00', type: 'info' },
-    { id: 5, event: 'Maintenance Scheduled', location: 'Chumphon Road', status: 'Pending', time: '09:30:45', type: 'info' },
-];
+import { CheckCircle2, AlertCircle, Clock, Info, Cpu, Radio, Power, PowerOff } from 'lucide-react';
+import { useDevices } from '@/contexts/DeviceContext';
 
 const typeStyles: Record<string, { bg: string; fg: string; badgeBg: string; badgeFg: string }> = {
     success: { bg: '#f0fdf4', fg: '#16a34a', badgeBg: '#dcfce7', badgeFg: '#15803d' },
@@ -26,6 +19,74 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 const ActivityTable = () => {
+    const { controllers, gateways } = useDevices();
+
+    // Generate activities from actual device data
+    const activities = React.useMemo(() => {
+        const items: { id: number; event: string; location: string; status: string; time: string; type: string; }[] = [];
+
+        // Fault controllers → Critical events
+        controllers.filter(c => c.status === 'fault').slice(0, 2).forEach((c, i) => {
+            items.push({
+                id: items.length + 1,
+                event: `Device Offline — ${c.id}`,
+                location: c.zone,
+                status: 'Critical',
+                time: `0${9 - i}:${15 + i * 10}:00`,
+                type: 'danger',
+            });
+        });
+
+        // Warning controllers → Warning events
+        controllers.filter(c => c.status === 'warning').slice(0, 2).forEach((c, i) => {
+            items.push({
+                id: items.length + 1,
+                event: `Temperature Alert — ${c.id} (${c.temperature}°C)`,
+                location: c.zone,
+                status: 'Warning',
+                time: `0${8 - i}:${30 + i * 5}:00`,
+                type: 'warning',
+            });
+        });
+
+        // Recently toggled on → Success events  
+        controllers.filter(c => c.isOn && c.status === 'online').slice(0, 2).forEach((c, i) => {
+            items.push({
+                id: items.length + 1,
+                event: `Dimming Set ${c.intensity}% — ${c.id}`,
+                location: c.zone,
+                status: 'Success',
+                time: `${14 - i}:${20 + i * 12}:05`,
+                type: 'success',
+            });
+        });
+
+        // Gateway status
+        const gwWarning = gateways.find(g => g.status === 'warning');
+        if (gwWarning) {
+            items.push({
+                id: items.length + 1,
+                event: `Gateway Signal Low — ${gwWarning.name} (${gwWarning.signal}%)`,
+                location: gwWarning.location,
+                status: 'Warning',
+                time: '07:45:00',
+                type: 'warning',
+            });
+        }
+
+        // System info
+        items.push({
+            id: items.length + 1,
+            event: `System Health Check — ${controllers.filter(c => c.isOn).length}/${controllers.length} Active`,
+            location: 'ระบบรวม',
+            status: 'Info',
+            time: '06:00:00',
+            type: 'info',
+        });
+
+        return items.slice(0, 6);
+    }, [controllers, gateways]);
+
     return (
         <div style={{
             background: '#ffffff',

@@ -7,28 +7,7 @@ import {
     PieChart, Pie, Cell,
 } from 'recharts';
 import { FileText, Table as TableIcon, Zap, Leaf, DollarSign, ChevronRight } from 'lucide-react';
-
-const yearlySavings = [
-    { month: 'Jan', before: 4500, after: 3200 },
-    { month: 'Feb', before: 4400, after: 3100 },
-    { month: 'Mar', before: 4600, after: 3000 },
-    { month: 'Apr', before: 4800, after: 3300 },
-    { month: 'May', before: 4700, after: 3200 },
-    { month: 'Jun', before: 4500, after: 3100 },
-];
-
-const zoneDistribution = [
-    { name: 'Phrae City', value: 45, color: '#2563eb' },
-    { name: 'Mueang Mo', value: 25, color: '#10b981' },
-    { name: 'Nai Wiang', value: 20, color: '#f59e0b' },
-    { name: 'Others', value: 10, color: '#94a3b8' },
-];
-
-const headlineCards = [
-    { icon: Zap, label: 'Total Savings', value: '452 kW', sub: '(-24.5%)', subColor: '#059669', desc: 'Cumulative savings since installation', gradient: 'linear-gradient(135deg, #2563eb, #1d4ed8)' },
-    { icon: Leaf, label: 'Carbon Offset', value: '12.4', sub: 'Tons', subColor: '#0f172a', desc: 'CO₂ reduction equivalent to 520 trees', gradient: 'linear-gradient(135deg, #059669, #047857)' },
-    { icon: DollarSign, label: 'Cost Savings', value: '฿18,240', sub: 'MTD', subColor: '#059669', desc: 'Maintenance & energy cost reduction', gradient: 'linear-gradient(135deg, #d97706, #b45309)' },
-];
+import { useDevices } from '@/contexts/DeviceContext';
 
 const CustomBarTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -52,6 +31,48 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
 export default function ReportsPage() {
     const [mounted, setMounted] = React.useState(false);
     React.useEffect(() => { setMounted(true); }, []);
+
+    const { controllers, zones } = useDevices();
+
+    // Compute real stats from DeviceContext
+    const totalPower = controllers.filter(c => c.isOn).reduce((s, c) => s + parseFloat(c.power), 0);
+    const avgDimming = controllers.filter(c => c.isOn).reduce((s, c) => s + c.intensity, 0) / Math.max(controllers.filter(c => c.isOn).length, 1);
+    const savingsPercent = (100 - avgDimming).toFixed(1);
+    const totalSavingsKw = (totalPower * (100 - avgDimming) / avgDimming).toFixed(0);
+    const carbonOffset = (totalPower * 0.5 * 0.08).toFixed(1); // rough CO2 estimate
+    const costSavings = (parseFloat(totalSavingsKw) * 4.5).toFixed(0); // ~4.5 baht per kWh
+
+    const headlineCards = [
+        { icon: Zap, label: 'Total Savings', value: `${totalSavingsKw} kW`, sub: `(-${savingsPercent}%)`, subColor: '#059669', desc: `จากเสาไฟ ${controllers.length} ต้น ในระบบ`, gradient: 'linear-gradient(135deg, #2563eb, #1d4ed8)' },
+        { icon: Leaf, label: 'Carbon Offset', value: carbonOffset, sub: 'Tons', subColor: '#0f172a', desc: `CO₂ ลดลงเทียบเท่าป่าไม้ ${Math.round(parseFloat(carbonOffset) * 42)} ต้น`, gradient: 'linear-gradient(135deg, #059669, #047857)' },
+        { icon: DollarSign, label: 'Cost Savings', value: `฿${parseInt(costSavings).toLocaleString()}`, sub: 'MTD', subColor: '#059669', desc: 'ประหยัดค่าไฟฟ้ารวมในเดือนนี้', gradient: 'linear-gradient(135deg, #d97706, #b45309)' },
+    ];
+
+    // Generate per-month bar chart data based on current power usage
+    const monthNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.'];
+    const basePower = totalPower > 0 ? totalPower : 30;
+    const yearlySavings = monthNames.map((m, i) => ({
+        month: m,
+        before: Math.round(basePower * (1.3 + Math.sin(i * 0.5) * 0.1)),
+        after: Math.round(basePower * (0.85 + Math.cos(i * 0.3) * 0.08)),
+    }));
+
+    // Zone distribution from real data
+    const topZones = zones.slice(0, 4).map((z, i) => {
+        const zoneControllers = controllers.filter(c => c.zoneId === z.id);
+        const zonePower = zoneControllers.filter(c => c.isOn).reduce((s, c) => s + parseFloat(c.power), 0);
+        return {
+            name: z.name.length > 20 ? z.name.substring(0, 18) + '...' : z.name,
+            value: Math.round((zonePower / Math.max(totalPower, 1)) * 100),
+            color: ['#2563eb', '#10b981', '#f59e0b', '#94a3b8'][i],
+        };
+    });
+    // Normalize to 100%
+    const topSum = topZones.reduce((s, z) => s + z.value, 0);
+    if (topSum > 0 && topSum !== 100) {
+        topZones[topZones.length - 1].value += 100 - topSum;
+    }
+    const zoneDistribution = topZones;
 
     return (
         <MainLayout title="Energy Analytics & Savings">
@@ -91,7 +112,9 @@ export default function ReportsPage() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
                             <div>
                                 <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Consumption Comparison</h3>
-                                <p style={{ fontSize: '13px', fontWeight: 500, color: '#94a3b8', margin: '4px 0 0' }}>Before vs. After Smart System Installation</p>
+                                <p style={{ fontSize: '13px', fontWeight: 500, color: '#94a3b8', margin: '4px 0 0' }}>
+                                    Before vs. After Smart System ({controllers.length} Controllers)
+                                </p>
                             </div>
                             <div style={{ display: 'flex', gap: '16px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -122,7 +145,7 @@ export default function ReportsPage() {
 
                     {/* Pie Chart */}
                     <div style={{ background: '#fff', borderRadius: '20px', padding: '28px', border: '1px solid #f1f5f9' }}>
-                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: '0 0 24px' }}>Saving by Zone</h3>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: '0 0 24px' }}>Energy by Zone</h3>
                         {mounted && (
                             <div style={{ height: '240px', width: '100%', position: 'relative' }}>
                                 <ResponsiveContainer width="100%" height="100%">
@@ -139,9 +162,9 @@ export default function ReportsPage() {
                                     position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
                                     alignItems: 'center', justifyContent: 'center', pointerEvents: 'none',
                                 }}>
-                                    <span style={{ fontSize: '32px', fontWeight: 800, color: '#0f172a' }}>24%</span>
+                                    <span style={{ fontSize: '32px', fontWeight: 800, color: '#0f172a' }}>{zones.length}</span>
                                     <span style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.06em', textAlign: 'center' }}>
-                                        Avg.<br />Efficiency
+                                        Zones<br />Total
                                     </span>
                                 </div>
                             </div>
@@ -188,7 +211,9 @@ export default function ReportsPage() {
                     }} />
                     <div style={{ position: 'relative', zIndex: 1 }}>
                         <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>Ready to generate official reports?</h3>
-                        <p style={{ fontSize: '14px', fontWeight: 500, color: '#94a3b8', margin: 0 }}>Download comprehensive analytical audits for administrative review.</p>
+                        <p style={{ fontSize: '14px', fontWeight: 500, color: '#94a3b8', margin: 0 }}>
+                            ดาวน์โหลดรายงานวิเคราะห์พลังงานสำหรับ {controllers.length} เสาไฟ, {zones.length} โซน
+                        </p>
                     </div>
                     <div style={{ display: 'flex', gap: '12px', position: 'relative', zIndex: 1 }}>
                         <button style={{
@@ -196,6 +221,7 @@ export default function ReportsPage() {
                             padding: '12px 24px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)',
                             background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: '13px', fontWeight: 600,
                             cursor: 'pointer', backdropFilter: 'blur(8px)', transition: 'background 0.2s',
+                            fontFamily: 'inherit',
                         }}
                             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
@@ -207,6 +233,7 @@ export default function ReportsPage() {
                             padding: '12px 24px', borderRadius: '14px', border: 'none',
                             background: '#2563eb', color: '#fff', fontSize: '13px', fontWeight: 600,
                             cursor: 'pointer', boxShadow: '0 8px 24px rgba(37,99,235,0.4)', transition: 'background 0.2s',
+                            fontFamily: 'inherit',
                         }}
                             onMouseEnter={(e) => { e.currentTarget.style.background = '#1d4ed8'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.background = '#2563eb'; }}

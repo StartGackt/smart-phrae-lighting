@@ -7,8 +7,19 @@ import EnergyChart from '@/components/dashboard/EnergyChart';
 import MapWidget from '@/components/dashboard/MapWidget';
 import ActivityTable from '@/components/dashboard/ActivityTable';
 import { Lightbulb, Wifi, Zap, AlertTriangle } from 'lucide-react';
+import { useDevices } from '@/contexts/DeviceContext';
 
 export default function Dashboard() {
+  const { controllers, gateways, zones } = useDevices();
+
+  const totalControllers = controllers.length;
+  const totalGateways = gateways.length;
+  const onlineControllers = controllers.filter(c => c.isOn && c.status !== 'fault').length;
+  const faultControllers = controllers.filter(c => c.status === 'fault').length;
+  const warningControllers = controllers.filter(c => c.status === 'warning').length;
+  const totalPower = controllers.filter(c => c.isOn).reduce((s, c) => s + parseFloat(c.power), 0).toFixed(1);
+  const systemUptime = ((totalControllers - faultControllers) / totalControllers * 100).toFixed(1);
+
   return (
     <MainLayout title="Dashboard Overview">
       <div className="flex flex-col gap-8">
@@ -16,33 +27,33 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             title="Total"
-            value="860"
-            description="Light Poles Managed"
+            value={totalControllers.toString()}
+            description={`${totalGateways} Gateways • ${zones.length} Zones`}
             icon={Lightbulb}
             color="blue"
-            trend={{ value: "+12 new this month", isUp: true }}
+            trend={{ value: `${totalGateways} Master Gateway`, isUp: true }}
           />
           <StatCard
-            title="Network"
-            value="842"
-            subValue="860"
-            description="97.9% System Uptime"
+            title="Online"
+            value={onlineControllers.toString()}
+            subValue={totalControllers.toString()}
+            description={`${systemUptime}% System Uptime`}
             icon={Wifi}
             color="green"
           />
           <StatCard
-            title="Consumption"
-            value="142"
+            title="Power"
+            value={totalPower}
             subValue="kW"
-            description="8% higher than average"
+            description="Realtime total consumption"
             icon={Zap}
             color="orange"
-            trend={{ value: "8% higher than average", isUp: false }}
+            trend={{ value: `${controllers.filter(c => c.isOn).length} active poles`, isUp: true }}
           />
           <StatCard
             title="Maintenance"
-            value="3"
-            description="Requires Attention"
+            value={(faultControllers + warningControllers).toString()}
+            description={`${faultControllers} Fault • ${warningControllers} Warning`}
             icon={AlertTriangle}
             color="red"
           />
