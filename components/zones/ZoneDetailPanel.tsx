@@ -20,9 +20,10 @@ interface ZoneDetailPanelProps {
     controllers: SmartController[];
     onClose: () => void;
     onViewDevice: (id: string) => void;
+    onViewAllDevices: () => void;
 }
 
-export default function ZoneDetailPanel({ zone, controllers, onClose, onViewDevice }: ZoneDetailPanelProps) {
+export default function ZoneDetailPanel({ zone, controllers, onClose, onViewDevice, onViewAllDevices }: ZoneDetailPanelProps) {
     const zoneControllers = controllers.filter(c => c.zoneId === zone.id);
     const onCount = zoneControllers.filter(c => c.isOn).length;
     const faultCount = zoneControllers.filter(c => c.status === 'fault').length;
@@ -200,7 +201,7 @@ export default function ZoneDetailPanel({ zone, controllers, onClose, onViewDevi
 
             {/* Bottom Button */}
             <div style={{ padding: '16px 20px', borderTop: '1px solid #f1f5f9', flexShrink: 0 }}>
-                <button style={{
+                <button onClick={onViewAllDevices} style={{
                     width: '100%', padding: '14px', borderRadius: '14px', border: 'none',
                     background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
                     color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer',

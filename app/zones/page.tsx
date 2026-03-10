@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 const MapComponent = dynamic(() => import('@/components/zones/ZoneMap'), { ssr: false });
 const ZoneDetailPanel = dynamic(() => import('@/components/zones/ZoneDetailPanel'), { ssr: false });
 const DeviceDetailPanel = dynamic(() => import('@/components/zones/DeviceDetailPanel'), { ssr: false });
+const ZoneDevicesPanel = dynamic(() => import('@/components/zones/ZoneDevicesPanel'), { ssr: false });
 
 export default function ZonesPage() {
     const {
@@ -25,7 +26,7 @@ export default function ZonesPage() {
     const [showGateways, setShowGateways] = React.useState(true);
     const [showControllers, setShowControllers] = React.useState(true);
     const [searchQuery, setSearchQuery] = React.useState('');
-    const [panelView, setPanelView] = React.useState<'none' | 'zone' | 'device'>('none');
+    const [panelView, setPanelView] = React.useState<'none' | 'zone' | 'zone-devices' | 'device'>('none');
 
     const filteredZones = searchQuery
         ? zones.filter(z => z.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -77,6 +78,24 @@ export default function ZonesPage() {
     const handleBackToZone = () => {
         setSelectedDeviceId(null);
         setPanelView('zone');
+    };
+
+    const handleViewAllDevices = () => {
+        setPanelView('zone-devices');
+    };
+
+    const handleBackToZoneFromDevices = () => {
+        setPanelView('zone');
+    };
+
+    const handleDeviceFromList = (id: string) => {
+        setSelectedDeviceId(id);
+        setPanelView('device');
+    };
+
+    const handleBackToDeviceList = () => {
+        setSelectedDeviceId(null);
+        setPanelView('zone-devices');
     };
 
     return (
@@ -218,6 +237,21 @@ export default function ZonesPage() {
                             controllers={controllers}
                             onClose={handleClosePanel}
                             onViewDevice={handleSelectDevice}
+                            onViewAllDevices={handleViewAllDevices}
+                        />
+                    )}
+
+                    {/* Zone Devices List Panel */}
+                    {panelView === 'zone-devices' && selectedZoneData && (
+                        <ZoneDevicesPanel
+                            zone={selectedZoneData}
+                            controllers={controllers}
+                            onClose={handleClosePanel}
+                            onBack={handleBackToZoneFromDevices}
+                            onToggle={toggleController}
+                            onIntensityChange={setControllerIntensity}
+                            onViewDevice={handleDeviceFromList}
+                            onToggleAll={toggleZoneControllers}
                         />
                     )}
 
@@ -228,7 +262,7 @@ export default function ZonesPage() {
                             onClose={handleClosePanel}
                             onToggle={() => toggleController(selectedDevice.id)}
                             onIntensityChange={(val) => setControllerIntensity(selectedDevice.id, val)}
-                            onBack={selectedZone ? handleBackToZone : undefined}
+                            onBack={selectedZone ? handleBackToDeviceList : undefined}
                         />
                     )}
 
