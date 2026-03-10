@@ -8,6 +8,7 @@ import {
   Lightbulb,
   Map as MapIcon,
   BarChart3,
+  Bell,
   Settings,
   ChevronRight,
   LogOut,
@@ -18,6 +19,7 @@ const menuItems = [
   { icon: Lightbulb, label: 'Light Control', href: '/devices' },
   { icon: MapIcon, label: 'Zone Management', href: '/zones' },
   { icon: BarChart3, label: 'Energy Reports', href: '/reports' },
+  { icon: Bell, label: 'Alerts', href: '/alerts' },
   { icon: Settings, label: 'System Settings', href: '/settings' },
 ];
 
