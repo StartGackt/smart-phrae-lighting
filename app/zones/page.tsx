@@ -10,28 +10,29 @@ import {
 import dynamic from 'next/dynamic';
 
 const MapComponent = dynamic(() => import('@/components/zones/ZoneMap'), { ssr: false });
+const ZoneDetailPanel = dynamic(() => import('@/components/zones/ZoneDetailPanel'), { ssr: false });
+const DeviceDetailPanel = dynamic(() => import('@/components/zones/DeviceDetailPanel'), { ssr: false });
 
 export default function ZonesPage() {
     const {
         controllers, gateways, zones,
-        toggleController, toggleGateway,
+        toggleController, toggleGateway, setControllerIntensity,
         toggleZoneControllers,
     } = useDevices();
 
     const [selectedZone, setSelectedZone] = React.useState<number | null>(null);
-    const [selectedPoleId, setSelectedPoleId] = React.useState<string | null>(null);
+    const [selectedDeviceId, setSelectedDeviceId] = React.useState<string | null>(null);
     const [showGateways, setShowGateways] = React.useState(true);
     const [showControllers, setShowControllers] = React.useState(true);
     const [searchQuery, setSearchQuery] = React.useState('');
+    const [panelView, setPanelView] = React.useState<'none' | 'zone' | 'device'>('none');
 
     const filteredZones = searchQuery
         ? zones.filter(z => z.name.toLowerCase().includes(searchQuery.toLowerCase()))
         : zones;
 
     const stats = {
-        totalControllers: controllers.length,
         onlineControllers: controllers.filter(c => c.isOn && c.status !== 'fault').length,
-        totalGateways: gateways.length,
         onlineGateways: gateways.filter(g => g.isOn).length,
     };
 
@@ -41,7 +42,8 @@ export default function ZonesPage() {
 
     const visibleGateways = showGateways ? gateways : [];
 
-    const selectedPole = selectedPoleId ? controllers.find(c => c.id === selectedPoleId) : null;
+    const selectedDevice = selectedDeviceId ? controllers.find(c => c.id === selectedDeviceId) : null;
+    const selectedZoneData = selectedZone ? zones.find(z => z.id === selectedZone) : null;
 
     // Zone stats
     const zoneStats = zones.map(z => ({
@@ -50,6 +52,32 @@ export default function ZonesPage() {
         total: controllers.filter(c => c.zoneId === z.id).length,
         allOn: controllers.filter(c => c.zoneId === z.id && c.status !== 'fault').every(c => c.isOn),
     }));
+
+    const handleSelectZone = (id: number | null) => {
+        setSelectedZone(id);
+        setSelectedDeviceId(null);
+        if (id) {
+            setPanelView('zone');
+        } else {
+            setPanelView('none');
+        }
+    };
+
+    const handleSelectDevice = (id: string) => {
+        setSelectedDeviceId(id);
+        setPanelView('device');
+    };
+
+    const handleClosePanel = () => {
+        setPanelView('none');
+        setSelectedDeviceId(null);
+        setSelectedZone(null);
+    };
+
+    const handleBackToZone = () => {
+        setSelectedDeviceId(null);
+        setPanelView('zone');
+    };
 
     return (
         <MainLayout title="Zone Management — GIS Map">
@@ -115,7 +143,7 @@ export default function ZonesPage() {
                                 {filteredZones.length} Zones
                             </p>
                             {selectedZone && (
-                                <button onClick={() => setSelectedZone(null)} style={{
+                                <button onClick={() => handleSelectZone(null)} style={{
                                     fontSize: '11px', fontWeight: 600, color: '#2563eb', background: '#eff6ff',
                                     border: 'none', padding: '3px 10px', borderRadius: '6px', cursor: 'pointer',
                                 }}>
@@ -123,51 +151,47 @@ export default function ZonesPage() {
                                 </button>
                             )}
                         </div>
-                        {(searchQuery ? filteredZones : zoneStats).map(z => {
-                            const zs = zoneStats.find(zz => zz.id === z.id)!;
-                            return (
-                                <div
-                                    key={z.id}
-                                    style={{
-                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                        padding: '9px 12px', borderRadius: '10px', cursor: 'pointer',
-                                        background: selectedZone === z.id ? '#eff6ff' : 'transparent',
-                                        transition: 'background 0.15s',
-                                    }}
-                                    onClick={() => setSelectedZone(selectedZone === z.id ? null : z.id)}
-                                    onMouseEnter={(e) => { if (selectedZone !== z.id) e.currentTarget.style.background = '#f8fafc'; }}
-                                    onMouseLeave={(e) => { if (selectedZone !== z.id) e.currentTarget.style.background = selectedZone === z.id ? '#eff6ff' : 'transparent'; }}
-                                >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
-                                        <div style={{
-                                            width: '6px', height: '6px', borderRadius: '50%',
-                                            background: zs.allOn ? '#22c55e' : zs.onCount > 0 ? '#f59e0b' : '#ef4444',
-                                            flexShrink: 0,
-                                        }} />
-                                        <div style={{ minWidth: 0 }}>
-                                            <p style={{ fontSize: '12px', fontWeight: 600, color: selectedZone === z.id ? '#2563eb' : '#334155', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                {z.name}
-                                            </p>
-                                            <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0 }}>
-                                                {zs.onCount}/{zs.total} on
-                                            </p>
-                                        </div>
+                        {(searchQuery ? filteredZones.map(z => zoneStats.find(zz => zz.id === z.id)!) : zoneStats).map(zs => (
+                            <div
+                                key={zs.id}
+                                style={{
+                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                    padding: '9px 12px', borderRadius: '10px', cursor: 'pointer',
+                                    background: selectedZone === zs.id ? '#eff6ff' : 'transparent',
+                                    transition: 'background 0.15s',
+                                }}
+                                onClick={() => handleSelectZone(selectedZone === zs.id ? null : zs.id)}
+                                onMouseEnter={(e) => { if (selectedZone !== zs.id) e.currentTarget.style.background = '#f8fafc'; }}
+                                onMouseLeave={(e) => { if (selectedZone !== zs.id) e.currentTarget.style.background = selectedZone === zs.id ? '#eff6ff' : 'transparent'; }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                                    <div style={{
+                                        width: '6px', height: '6px', borderRadius: '50%',
+                                        background: zs.allOn ? '#22c55e' : zs.onCount > 0 ? '#f59e0b' : '#ef4444',
+                                        flexShrink: 0,
+                                    }} />
+                                    <div style={{ minWidth: 0 }}>
+                                        <p style={{ fontSize: '12px', fontWeight: 600, color: selectedZone === zs.id ? '#2563eb' : '#334155', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {zs.name}
+                                        </p>
+                                        <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0 }}>
+                                            {zs.onCount}/{zs.total} on
+                                        </p>
                                     </div>
-                                    {/* Quick zone toggle */}
-                                    <button onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleZoneControllers(z.id, !zs.allOn);
-                                    }} style={{
-                                        padding: '3px 8px', borderRadius: '6px', border: 'none', cursor: 'pointer',
-                                        background: zs.allOn ? '#dcfce7' : '#fee2e2',
-                                        color: zs.allOn ? '#15803d' : '#b91c1c',
-                                        fontSize: '9px', fontWeight: 700, fontFamily: 'inherit', flexShrink: 0,
-                                    }}>
-                                        {zs.allOn ? 'ON' : 'OFF'}
-                                    </button>
                                 </div>
-                            );
-                        })}
+                                <button onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleZoneControllers(zs.id, !zs.allOn);
+                                }} style={{
+                                    padding: '3px 8px', borderRadius: '6px', border: 'none', cursor: 'pointer',
+                                    background: zs.allOn ? '#dcfce7' : '#fee2e2',
+                                    color: zs.allOn ? '#15803d' : '#b91c1c',
+                                    fontSize: '9px', fontWeight: 700, fontFamily: 'inherit', flexShrink: 0,
+                                }}>
+                                    {zs.allOn ? 'ON' : 'OFF'}
+                                </button>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
@@ -181,86 +205,38 @@ export default function ZonesPage() {
                         gateways={visibleGateways}
                         zones={zones}
                         selectedZone={selectedZone}
-                        onSelectZone={(id) => setSelectedZone(id)}
-                        onSelectPole={(id) => setSelectedPoleId(id)}
+                        onSelectZone={handleSelectZone}
+                        onSelectPole={handleSelectDevice}
                         onToggleController={toggleController}
                         onToggleGateway={toggleGateway}
                     />
 
-                    {/* Pole Detail Popup */}
-                    {selectedPole && (
-                        <div style={{
-                            position: 'absolute', bottom: '20px', left: '20px', right: '20px',
-                            background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
-                            borderRadius: '16px', padding: '20px 24px', boxShadow: '0 12px 40px rgba(0,0,0,0.12)',
-                            zIndex: 1000, display: 'flex', gap: '20px', alignItems: 'center',
-                        }}>
-                            <button onClick={() => setSelectedPoleId(null)} style={{
-                                position: 'absolute', top: '10px', right: '10px', background: '#f8fafc',
-                                border: 'none', borderRadius: '8px', width: '28px', height: '28px',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#94a3b8',
-                            }}><X size={14} /></button>
+                    {/* Zone Detail Panel */}
+                    {panelView === 'zone' && selectedZoneData && (
+                        <ZoneDetailPanel
+                            zone={selectedZoneData}
+                            controllers={controllers}
+                            onClose={handleClosePanel}
+                            onViewDevice={handleSelectDevice}
+                        />
+                    )}
 
-                            <div style={{
-                                width: '50px', height: '50px', borderRadius: '14px', flexShrink: 0,
-                                background: selectedPole.isOn ? '#ecfdf5' : '#f8fafc',
-                                color: selectedPole.isOn ? '#059669' : '#94a3b8',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s',
-                            }}><Cpu size={22} /></div>
-
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', margin: 0 }}>{selectedPole.id}</h4>
-                                    <span style={{
-                                        fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase',
-                                        background: selectedPole.isOn ? '#dcfce7' : '#fee2e2',
-                                        color: selectedPole.isOn ? '#15803d' : '#b91c1c',
-                                    }}>{selectedPole.isOn ? 'ON' : 'OFF'}</span>
-                                    <span style={{
-                                        fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px',
-                                        background: '#f1f5f9', color: '#64748b',
-                                    }}>{selectedPole.loraMode}</span>
-                                </div>
-                                <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>{selectedPole.zone}</p>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '16px' }}>
-                                {[
-                                    { icon: Gauge, label: 'แรงดัน', value: `${selectedPole.voltage}V`, color: '#2563eb' },
-                                    { icon: Thermometer, label: 'อุณหภูมิ', value: `${selectedPole.temperature}°C`, color: '#f59e0b' },
-                                    { icon: Zap, label: 'กำลังไฟ', value: `${selectedPole.power}kW`, color: '#059669' },
-                                ].map(d => (
-                                    <div key={d.label} style={{ textAlign: 'center' }}>
-                                        <d.icon size={14} style={{ color: d.color, marginBottom: '3px' }} />
-                                        <p style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', margin: 0 }}>{d.value}</p>
-                                        <p style={{ fontSize: '9px', fontWeight: 600, color: '#94a3b8', margin: 0 }}>{d.label}</p>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Toggle from map */}
-                            <button
-                                onClick={() => toggleController(selectedPole.id)}
-                                disabled={selectedPole.status === 'fault'}
-                                style={{
-                                    padding: '10px 20px', borderRadius: '12px', border: 'none', cursor: selectedPole.status === 'fault' ? 'not-allowed' : 'pointer',
-                                    background: selectedPole.isOn ? '#fef2f2' : '#ecfdf5',
-                                    color: selectedPole.isOn ? '#dc2626' : '#059669',
-                                    fontSize: '12px', fontWeight: 700, fontFamily: 'inherit', flexShrink: 0,
-                                    display: 'flex', alignItems: 'center', gap: '6px',
-                                }}
-                            >
-                                {selectedPole.isOn ? <><PowerOff size={14} /> ปิด</> : <><Power size={14} /> เปิด</>}
-                            </button>
-                        </div>
+                    {/* Device Detail Panel */}
+                    {panelView === 'device' && selectedDevice && (
+                        <DeviceDetailPanel
+                            controller={selectedDevice}
+                            onClose={handleClosePanel}
+                            onToggle={() => toggleController(selectedDevice.id)}
+                            onIntensityChange={(val) => setControllerIntensity(selectedDevice.id, val)}
+                            onBack={selectedZone ? handleBackToZone : undefined}
+                        />
                     )}
 
                     {/* Legend */}
                     <div style={{
-                        position: 'absolute', bottom: selectedPole ? '110px' : '16px', right: '16px', zIndex: 999,
+                        position: 'absolute', bottom: '16px', left: '16px', zIndex: 999,
                         background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
                         borderRadius: '10px', padding: '10px 14px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                        transition: 'bottom 0.3s',
                     }}>
                         <div style={{ display: 'flex', gap: '12px', fontSize: '10px', fontWeight: 600, color: '#64748b' }}>
                             {[
