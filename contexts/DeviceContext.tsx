@@ -35,25 +35,27 @@ export interface MasterGateway {
     ip: string;
     firmware: string;
     uptime: string;
+    zoneIds: number[];
+    coverage: number;
 }
 
 // ==================== Data Generation ====================
 
 const zoneData = [
-    { id: 1, name: 'ถ.ยันตรกิจโกศล (เหนือ)', poles: 42, lat: 18.1520, lng: 100.1390 },
-    { id: 2, name: 'ถ.ยันตรกิจโกศล (ใต้)', poles: 38, lat: 18.1440, lng: 100.1410 },
-    { id: 3, name: 'ถ.เจริญเมือง (เหนือ)', poles: 28, lat: 18.1535, lng: 100.1420 },
-    { id: 4, name: 'ถ.เจริญเมือง (กลาง)', poles: 30, lat: 18.1480, lng: 100.1430 },
-    { id: 5, name: 'ถ.เจริญเมือง (ใต้)', poles: 27, lat: 18.1425, lng: 100.1440 },
+    { id: 1, name: 'ถ.ยันตรกิจโกศล (เหนือ)', poles: 48, lat: 18.1520, lng: 100.1390 },
+    { id: 2, name: 'ถ.ยันตรกิจโกศล (ใต้)', poles: 44, lat: 18.1440, lng: 100.1410 },
+    { id: 3, name: 'ถ.เจริญเมือง (เหนือ)', poles: 32, lat: 18.1535, lng: 100.1420 },
+    { id: 4, name: 'ถ.เจริญเมือง (กลาง)', poles: 34, lat: 18.1480, lng: 100.1430 },
+    { id: 5, name: 'ถ.เจริญเมือง (ใต้)', poles: 30, lat: 18.1425, lng: 100.1440 },
     { id: 6, name: 'ถ.พระร่วง', poles: 22, lat: 18.1510, lng: 100.1460 },
-    { id: 7, name: 'ถ.ชุมพล', poles: 32, lat: 18.1460, lng: 100.1475 },
-    { id: 8, name: 'ถ.ราษฎรบำรุง', poles: 35, lat: 18.1400, lng: 100.1350 },
+    { id: 7, name: 'ถ.ชุมพล', poles: 36, lat: 18.1460, lng: 100.1475 },
+    { id: 8, name: 'ถ.ราษฎรบำรุง', poles: 38, lat: 18.1400, lng: 100.1350 },
     { id: 9, name: 'ถ.คำลือ', poles: 25, lat: 18.1405, lng: 100.1400 },
     { id: 10, name: 'ถ.ไชยบูรณ์', poles: 20, lat: 18.1390, lng: 100.1450 },
     { id: 11, name: 'ถ.น้ำคือ', poles: 28, lat: 18.1385, lng: 100.1490 },
     { id: 12, name: 'ถ.ศรีบุตร', poles: 18, lat: 18.1370, lng: 100.1320 },
     { id: 13, name: 'ถ.เมืองหิต', poles: 22, lat: 18.1365, lng: 100.1370 },
-    { id: 14, name: 'ถ.แพร่-สูงเม่น', poles: 45, lat: 18.1350, lng: 100.1430 },
+    { id: 14, name: 'ถ.แพร่-สูงเม่น', poles: 50, lat: 18.1350, lng: 100.1430 },
     { id: 15, name: 'ตลาดรองเกสรี', poles: 12, lat: 18.1475, lng: 100.1445 },
     { id: 16, name: 'ซ.บ้านทุ่ง 1', poles: 15, lat: 18.1530, lng: 100.1510 },
     { id: 17, name: 'ซ.บ้านทุ่ง 2', poles: 14, lat: 18.1505, lng: 100.1520 },
@@ -61,16 +63,16 @@ const zoneData = [
     { id: 19, name: 'ถ.วังหงษ์', poles: 20, lat: 18.1440, lng: 100.1550 },
     { id: 20, name: 'ถ.มหาไชย', poles: 16, lat: 18.1340, lng: 100.1310 },
     { id: 21, name: 'ซ.วัดศรีชุม', poles: 14, lat: 18.1335, lng: 100.1360 },
-    { id: 22, name: 'ถ.รอบเวียง (เหนือ)', poles: 30, lat: 18.1470, lng: 100.1420 },
+    { id: 22, name: 'ถ.รอบเวียง (เหนือ)', poles: 33, lat: 18.1470, lng: 100.1420 },
     { id: 23, name: 'ถ.รอบเวียง (ใต้)', poles: 28, lat: 18.1445, lng: 100.1425 },
     { id: 24, name: 'ซ.ร่องฟอง', poles: 20, lat: 18.1320, lng: 100.1470 },
-    { id: 25, name: 'ถ.เหมืองหิต-ดอนมูล', poles: 32, lat: 18.1310, lng: 100.1510 },
+    { id: 25, name: 'ถ.เหมืองหิต-ดอนมูล', poles: 36, lat: 18.1310, lng: 100.1510 },
     { id: 26, name: 'สวนสุขภาพ', poles: 10, lat: 18.1325, lng: 100.1330 },
     { id: 27, name: 'วัดจอมสวรรค์', poles: 8, lat: 18.1460, lng: 100.1395 },
-    { id: 28, name: 'ถ.ช่อแฮ', poles: 35, lat: 18.1290, lng: 100.1340 },
+    { id: 28, name: 'ถ.ช่อแฮ', poles: 40, lat: 18.1290, lng: 100.1340 },
     { id: 29, name: 'ถ.บ้านกวาว', poles: 22, lat: 18.1285, lng: 100.1390 },
     { id: 30, name: 'ถ.พญาพล', poles: 18, lat: 18.1280, lng: 100.1440 },
-    { id: 31, name: 'ซ.ทุ่งกวาว-หนองม่วง', poles: 25, lat: 18.1270, lng: 100.1500 },
+    { id: 31, name: 'ซ.ทุ่งกวาว-หนองม่วง', poles: 29, lat: 18.1270, lng: 100.1500 },
     { id: 32, name: 'ถ.แม่จั๊ว', poles: 20, lat: 18.1260, lng: 100.1540 },
     { id: 33, name: 'บ้านน้ำชำ', poles: 16, lat: 18.1240, lng: 100.1530 },
     { id: 34, name: 'บ้านทุ่งโฮ้ง', poles: 24, lat: 18.1250, lng: 100.1460 },
@@ -141,6 +143,8 @@ function generateGateways(): MasterGateway[] {
         ip: `192.168.1.${101 + i}`,
         firmware: i % 4 === 0 ? 'v3.1.0' : 'v3.2.1',
         uptime: i === 3 ? '12d 4h' : `${30 + i * 3}d ${i % 24}h`,
+        zoneIds: [i * 2 + 1, Math.min(i * 2 + 2, 34)],
+        coverage: g.nodes,
     }));
 }
 
