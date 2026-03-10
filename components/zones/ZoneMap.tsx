@@ -2,44 +2,45 @@
 
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Circle, Popup, useMap } from 'react-leaflet';
-import type { Pole, Zone, Gateway } from '@/app/zones/page';
+import type { SmartController, MasterGateway } from '@/contexts/DeviceContext';
 import 'leaflet/dist/leaflet.css';
 
-interface ZoneMapProps {
-    zones: Zone[];
-    poles: Pole[];
-    gateways: Gateway[];
-    selectedZone: number | null;
-    onSelectZone: (id: number | null) => void;
-    onSelectPole: (pole: Pole) => void;
+interface Zone {
+    id: number;
+    name: string;
+    poles: number;
+    lat: number;
+    lng: number;
 }
 
-// Component to fly to selected zone
+interface ZoneMapProps {
+    controllers: SmartController[];
+    gateways: MasterGateway[];
+    zones: Zone[];
+    selectedZone: number | null;
+    onSelectZone: (id: number | null) => void;
+    onSelectPole: (id: string) => void;
+    onToggleController: (id: string) => void;
+    onToggleGateway: (id: string) => void;
+}
+
 function FlyToZone({ zones, selectedZone }: { zones: Zone[]; selectedZone: number | null }) {
     const map = useMap();
-
     useEffect(() => {
         if (selectedZone) {
             const zone = zones.find(z => z.id === selectedZone);
-            if (zone) {
-                map.flyTo([zone.lat, zone.lng], 17, { duration: 0.8 });
-            }
+            if (zone) map.flyTo([zone.lat, zone.lng], 17, { duration: 0.8 });
         } else {
-            // Reset to overview
             map.flyTo([18.1430, 100.1420], 15, { duration: 0.8 });
         }
     }, [selectedZone, zones, map]);
-
     return null;
 }
 
-const statusColors = {
-    online: '#22c55e',
-    warning: '#f59e0b',
-    fault: '#ef4444',
-};
-
-const ZoneMap = ({ zones, poles, gateways, selectedZone, onSelectZone, onSelectPole }: ZoneMapProps) => {
+const ZoneMap = ({
+    controllers, gateways, zones, selectedZone,
+    onSelectZone, onSelectPole, onToggleController, onToggleGateway,
+}: ZoneMapProps) => {
     return (
         <MapContainer
             center={[18.1430, 100.1420]}
@@ -52,110 +53,111 @@ const ZoneMap = ({ zones, poles, gateways, selectedZone, onSelectZone, onSelectP
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; OpenStreetMap'
             />
-
             <FlyToZone zones={zones} selectedZone={selectedZone} />
 
-            {/* Zone circles */}
-            {zones.map(z => (
-                <Circle
-                    key={`zone-${z.id}`}
-                    center={[z.lat, z.lng]}
-                    radius={selectedZone === z.id ? 120 : 80}
-                    pathOptions={{
-                        color: z.color,
-                        fillColor: z.color,
-                        fillOpacity: selectedZone === z.id ? 0.25 : 0.08,
-                        weight: selectedZone === z.id ? 2 : 1,
-                    }}
-                    eventHandlers={{
-                        click: () => onSelectZone(selectedZone === z.id ? null : z.id),
-                    }}
-                >
-                    <Popup>
-                        <div style={{ fontFamily: 'Inter, sans-serif', minWidth: '160px' }}>
-                            <p style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: '0 0 4px' }}>{z.name}</p>
-                            <p style={{ fontSize: '12px', color: '#64748b', margin: '0 0 2px' }}>Zone {z.id} — {z.poles} เสาไฟ</p>
-                            <div style={{
-                                width: '10px', height: '10px', borderRadius: '3px',
-                                background: z.color, display: 'inline-block', marginRight: '6px', verticalAlign: 'middle',
-                            }} />
-                            <span style={{ fontSize: '11px', color: '#94a3b8' }}>คลิกเพื่อ Zoom</span>
-                        </div>
-                    </Popup>
-                </Circle>
-            ))}
+            {/* Controller markers — color reflects ON/OFF state */}
+            {controllers.map(c => {
+                const color = c.status === 'fault' ? '#ef4444'
+                    : !c.isOn ? '#94a3b8'
+                        : c.status === 'warning' ? '#f59e0b'
+                            : '#22c55e';
 
-            {/* Pole markers */}
-            {poles.map(p => (
-                <CircleMarker
-                    key={p.id}
-                    center={[p.lat, p.lng]}
-                    radius={6}
-                    pathOptions={{
-                        color: '#fff',
-                        weight: 2,
-                        fillColor: statusColors[p.status],
-                        fillOpacity: 0.9,
-                    }}
-                    eventHandlers={{
-                        click: () => onSelectPole(p),
-                    }}
-                >
-                    <Popup>
-                        <div style={{ fontFamily: 'Inter, sans-serif', minWidth: '180px' }}>
-                            <p style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: '0 0 4px' }}>{p.id}</p>
-                            <p style={{ fontSize: '12px', color: '#64748b', margin: '0 0 6px' }}>{p.zone}</p>
-                            <div style={{ display: 'flex', gap: '12px', fontSize: '11px' }}>
-                                <span style={{ color: '#2563eb' }}>⚡ {p.voltage}V</span>
-                                <span style={{ color: '#f59e0b' }}>🌡️ {p.temperature}°C</span>
-                                <span style={{ color: '#059669' }}>💡 {p.power}kW</span>
+                return (
+                    <CircleMarker
+                        key={c.id}
+                        center={[c.lat, c.lng]}
+                        radius={5}
+                        pathOptions={{
+                            color: '#fff', weight: 1.5,
+                            fillColor: color, fillOpacity: c.isOn ? 0.9 : 0.4,
+                        }}
+                        eventHandlers={{ click: () => onSelectPole(c.id) }}
+                    >
+                        <Popup>
+                            <div style={{ fontFamily: 'Inter, sans-serif', minWidth: '200px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>{c.id}</span>
+                                    <span style={{
+                                        fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px',
+                                        background: c.isOn ? '#dcfce7' : '#fee2e2',
+                                        color: c.isOn ? '#15803d' : '#b91c1c',
+                                    }}>{c.isOn ? 'ON' : 'OFF'}</span>
+                                </div>
+                                <p style={{ fontSize: '11px', color: '#64748b', margin: '0 0 4px' }}>{c.zone}</p>
+                                <div style={{ display: 'flex', gap: '10px', fontSize: '11px', margin: '4px 0' }}>
+                                    <span style={{ color: '#2563eb' }}>⚡{c.voltage}V</span>
+                                    <span style={{ color: '#f59e0b' }}>🌡️{c.temperature}°C</span>
+                                    <span style={{ color: '#059669' }}>💡{c.power}kW</span>
+                                </div>
+                                <div style={{ display: 'flex', gap: '6px', fontSize: '10px', color: '#94a3b8', marginBottom: '8px' }}>
+                                    <span>LoRa {c.loraMode}</span>
+                                    <span>• FW {c.firmware}</span>
+                                </div>
+                                {c.status !== 'fault' && (
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); onToggleController(c.id); }}
+                                        style={{
+                                            padding: '6px 14px', borderRadius: '8px', border: 'none',
+                                            background: c.isOn ? '#fef2f2' : '#ecfdf5',
+                                            color: c.isOn ? '#dc2626' : '#059669',
+                                            fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', width: '100%',
+                                        }}
+                                    >{c.isOn ? '🔴 ปิด' : '🟢 เปิด'}</button>
+                                )}
                             </div>
-                            <span style={{
-                                display: 'inline-block', marginTop: '6px',
-                                fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px',
-                                textTransform: 'uppercase' as const,
-                                background: p.status === 'online' ? '#dcfce7' : p.status === 'warning' ? '#fef3c7' : '#fee2e2',
-                                color: p.status === 'online' ? '#15803d' : p.status === 'warning' ? '#b45309' : '#b91c1c',
-                            }}>{p.status}</span>
-                        </div>
-                    </Popup>
-                </CircleMarker>
-            ))}
+                        </Popup>
+                    </CircleMarker>
+                );
+            })}
 
             {/* Gateway markers */}
             {gateways.map(g => (
                 <React.Fragment key={g.id}>
-                    <Circle
-                        center={[g.lat, g.lng]}
-                        radius={200}
-                        pathOptions={{
-                            color: g.status === 'online' ? '#2563eb' : '#f59e0b',
-                            fillColor: g.status === 'online' ? '#2563eb' : '#f59e0b',
-                            fillOpacity: 0.06,
-                            weight: 1,
-                            dashArray: '6 4',
-                        }}
-                    />
+                    {g.isOn && (
+                        <Circle
+                            center={[g.lat, g.lng]}
+                            radius={200}
+                            pathOptions={{
+                                color: '#2563eb', fillColor: '#2563eb',
+                                fillOpacity: 0.04, weight: 1, dashArray: '6 4',
+                            }}
+                        />
+                    )}
                     <CircleMarker
                         center={[g.lat, g.lng]}
                         radius={8}
                         pathOptions={{
-                            color: '#fff',
-                            weight: 3,
-                            fillColor: g.status === 'online' ? '#2563eb' : '#f59e0b',
-                            fillOpacity: 1,
+                            color: '#fff', weight: 3,
+                            fillColor: !g.isOn ? '#94a3b8' : g.status === 'warning' ? '#f59e0b' : '#2563eb',
+                            fillOpacity: g.isOn ? 1 : 0.4,
                         }}
                     >
                         <Popup>
-                            <div style={{ fontFamily: 'Inter, sans-serif', minWidth: '150px' }}>
-                                <p style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', margin: '0 0 2px' }}>{g.name}</p>
-                                <p style={{ fontSize: '11px', color: '#64748b', margin: '0 0 4px' }}>{g.id}</p>
-                                <span style={{
-                                    fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px',
-                                    textTransform: 'uppercase' as const,
-                                    background: g.status === 'online' ? '#dbeafe' : '#fef3c7',
-                                    color: g.status === 'online' ? '#1d4ed8' : '#b45309',
-                                }}>{g.status}</span>
+                            <div style={{ fontFamily: 'Inter, sans-serif', minWidth: '180px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{g.name}</span>
+                                    <span style={{
+                                        fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px',
+                                        background: g.isOn ? '#dbeafe' : '#fee2e2',
+                                        color: g.isOn ? '#1d4ed8' : '#b91c1c',
+                                    }}>{g.isOn ? 'ON' : 'OFF'}</span>
+                                </div>
+                                <p style={{ fontSize: '11px', color: '#64748b', margin: '0 0 4px' }}>{g.id} • {g.location}</p>
+                                <div style={{ display: 'flex', gap: '8px', fontSize: '11px', margin: '6px 0' }}>
+                                    <span style={{ color: '#2563eb' }}>📡 {g.cellularType}</span>
+                                    <span style={{ color: '#059669' }}>Signal {g.signal}%</span>
+                                    <span style={{ color: '#64748b' }}>Nodes {g.connectedNodes}</span>
+                                </div>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onToggleGateway(g.id); }}
+                                    style={{
+                                        padding: '6px 14px', borderRadius: '8px', border: 'none',
+                                        background: g.isOn ? '#fef2f2' : '#ecfdf5',
+                                        color: g.isOn ? '#dc2626' : '#059669',
+                                        fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', width: '100%',
+                                        marginTop: '4px',
+                                    }}
+                                >{g.isOn ? '🔴 ปิด Gateway' : '🟢 เปิด Gateway'}</button>
                             </div>
                         </Popup>
                     </CircleMarker>
