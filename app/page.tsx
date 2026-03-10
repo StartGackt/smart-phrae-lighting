@@ -4,7 +4,7 @@ import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import StatCard from '@/components/dashboard/StatCard';
 import EnergyChart from '@/components/dashboard/EnergyChart';
-import MapWidget from '@/components/dashboard/MapWidget';
+import PoleOverview from '@/components/dashboard/PoleOverview';
 import ActivityTable from '@/components/dashboard/ActivityTable';
 import { Lightbulb, Wifi, Zap, AlertTriangle } from 'lucide-react';
 import { useDevices } from '@/contexts/DeviceContext';
@@ -65,7 +65,7 @@ export default function Dashboard() {
             <EnergyChart />
           </div>
           <div className="lg:col-span-1">
-            <MapWidget />
+            <PoleOverview />
           </div>
         </div>
 
