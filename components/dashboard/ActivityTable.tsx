@@ -29,9 +29,9 @@ const ActivityTable = () => {
         controllers.filter(c => c.status === 'fault').slice(0, 2).forEach((c, i) => {
             items.push({
                 id: items.length + 1,
-                event: `Device Offline — ${c.id}`,
+                event: `อุปกรณ์ออฟไลน์ — ${c.id}`,
                 location: c.zone,
-                status: 'Critical',
+                status: 'วิกฤต',
                 time: `0${9 - i}:${15 + i * 10}:00`,
                 type: 'danger',
             });
@@ -41,9 +41,9 @@ const ActivityTable = () => {
         controllers.filter(c => c.status === 'warning').slice(0, 2).forEach((c, i) => {
             items.push({
                 id: items.length + 1,
-                event: `Temperature Alert — ${c.id} (${c.temperature}°C)`,
+                event: `อุณหภูมิผิดปกติ — ${c.id} (${c.temperature}°C)`,
                 location: c.zone,
-                status: 'Warning',
+                status: 'เฝ้าระวัง',
                 time: `0${8 - i}:${30 + i * 5}:00`,
                 type: 'warning',
             });
@@ -53,9 +53,9 @@ const ActivityTable = () => {
         controllers.filter(c => c.isOn && c.status === 'online').slice(0, 2).forEach((c, i) => {
             items.push({
                 id: items.length + 1,
-                event: `Dimming Set ${c.intensity}% — ${c.id}`,
+                event: `ปรับความสว่าง ${c.intensity}% — ${c.id}`,
                 location: c.zone,
-                status: 'Success',
+                status: 'ปกติ',
                 time: `${14 - i}:${20 + i * 12}:05`,
                 type: 'success',
             });
@@ -66,9 +66,9 @@ const ActivityTable = () => {
         if (gwWarning) {
             items.push({
                 id: items.length + 1,
-                event: `Gateway Signal Low — ${gwWarning.name} (${gwWarning.signal}%)`,
+                event: `สัญญาณเกตเวย์อ่อน — ${gwWarning.name} (${gwWarning.signal}%)`,
                 location: gwWarning.location,
-                status: 'Warning',
+                status: 'เฝ้าระวัง',
                 time: '07:45:00',
                 type: 'warning',
             });
@@ -77,9 +77,9 @@ const ActivityTable = () => {
         // System info
         items.push({
             id: items.length + 1,
-            event: `System Health Check — ${controllers.filter(c => c.isOn).length}/${controllers.length} Active`,
+            event: `รายงานสถานะระบบ — ทำงานอยู่ ${controllers.filter(c => c.isOn).length}/${controllers.length} อุปกรณ์`,
             location: 'ระบบรวม',
-            status: 'Info',
+            status: 'ข้อมูล',
             time: '06:00:00',
             type: 'info',
         });
@@ -102,13 +102,13 @@ const ActivityTable = () => {
                 alignItems: 'center',
                 borderBottom: '1px solid #f1f5f9',
             }}>
-                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>System Activity</h3>
+                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>บันทึกเหตุการณ์ (System Activity)</h3>
                 <button style={{
                     fontSize: '13px', fontWeight: 600, color: '#2563eb', background: '#eff6ff',
                     border: 'none', padding: '8px 18px', borderRadius: '10px', cursor: 'pointer',
                     transition: 'background 0.2s',
                 }}>
-                    View All Logs
+                    ดูบันทึกทั้งหมด
                 </button>
             </div>
 
@@ -116,11 +116,10 @@ const ActivityTable = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr style={{ background: '#fafbfc' }}>
-                        {['Event', 'Location', 'Status', 'Time'].map((h) => (
+                        {['เหตุการณ์', 'ตำแหน่ง', 'สถานะ', 'เวลา'].map((h) => (
                             <th key={h} style={{
                                 padding: '12px 28px', textAlign: 'left',
-                                fontSize: '11px', fontWeight: 700, color: '#94a3b8',
-                                textTransform: 'uppercase' as const, letterSpacing: '0.08em',
+                                fontSize: '12px', fontWeight: 700, color: '#94a3b8',
                             }}>{h}</th>
                         ))}
                     </tr>

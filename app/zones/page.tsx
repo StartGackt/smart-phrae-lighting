@@ -99,7 +99,7 @@ export default function ZonesPage() {
     };
 
     return (
-        <MainLayout title="Zone Management — GIS Map">
+        <MainLayout title="จัดการแผนที่/โซน (Zone Management) — GIS Map">
             <div style={{ display: 'flex', gap: '24px', height: 'calc(100vh - 148px)' }}>
                 {/* Left Panel */}
                 <div style={{ width: '320px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -120,22 +120,22 @@ export default function ZonesPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                         <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #f1f5f9', padding: '14px', textAlign: 'center' }}>
                             <p style={{ fontSize: '20px', fontWeight: 800, color: '#2563eb', margin: 0 }}>{stats.onlineControllers}</p>
-                            <p style={{ fontSize: '9px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '2px 0 0' }}>Controllers On</p>
+                            <p style={{ fontSize: '9px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '2px 0 0' }}>โคมไฟทำงานอยู่</p>
                         </div>
                         <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #f1f5f9', padding: '14px', textAlign: 'center' }}>
                             <p style={{ fontSize: '20px', fontWeight: 800, color: '#059669', margin: 0 }}>{stats.onlineGateways}</p>
-                            <p style={{ fontSize: '9px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '2px 0 0' }}>Gateways On</p>
+                            <p style={{ fontSize: '9px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '2px 0 0' }}>เกตเวย์ทำงานอยู่</p>
                         </div>
                     </div>
 
                     {/* Layer Toggles */}
                     <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #f1f5f9', padding: '16px' }}>
                         <p style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>
-                            <Layers size={12} style={{ marginRight: '6px', verticalAlign: 'middle' }} />Map Layers
+                            <Layers size={12} style={{ marginRight: '6px', verticalAlign: 'middle' }} />การแสดงผลแผนที่
                         </p>
                         {[
-                            { label: 'Smart Controllers', icon: Cpu, on: showControllers, toggle: () => setShowControllers(!showControllers) },
-                            { label: 'Master Gateways', icon: Radio, on: showGateways, toggle: () => setShowGateways(!showGateways) },
+                            { label: 'ชุดควบคุมอัจฉริยะ', icon: Cpu, on: showControllers, toggle: () => setShowControllers(!showControllers) },
+                            { label: 'เกตเวย์หลัก', icon: Radio, on: showGateways, toggle: () => setShowGateways(!showGateways) },
                         ].map(l => (
                             <div key={l.label} style={{
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0',
@@ -159,14 +159,14 @@ export default function ZonesPage() {
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '12px 12px 8px' }}>
                             <p style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
-                                {filteredZones.length} Zones
+                                {filteredZones.length} โซน
                             </p>
                             {selectedZone && (
                                 <button onClick={() => handleSelectZone(null)} style={{
                                     fontSize: '11px', fontWeight: 600, color: '#2563eb', background: '#eff6ff',
                                     border: 'none', padding: '3px 10px', borderRadius: '6px', cursor: 'pointer',
                                 }}>
-                                    Reset
+                                    คืนค่า
                                 </button>
                             )}
                         </div>
@@ -194,7 +194,7 @@ export default function ZonesPage() {
                                             {zs.name}
                                         </p>
                                         <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0 }}>
-                                            {zs.onCount}/{zs.total} on
+                                            {zs.onCount}/{zs.total} กำลังทำงาน
                                         </p>
                                     </div>
                                 </div>
@@ -207,7 +207,7 @@ export default function ZonesPage() {
                                     color: zs.allOn ? '#15803d' : '#b91c1c',
                                     fontSize: '9px', fontWeight: 700, fontFamily: 'inherit', flexShrink: 0,
                                 }}>
-                                    {zs.allOn ? 'ON' : 'OFF'}
+                                    {zs.allOn ? 'เปิด' : 'ปิด'}
                                 </button>
                             </div>
                         ))}

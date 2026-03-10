@@ -15,12 +15,12 @@ import {
 } from 'lucide-react';
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
-  { icon: Lightbulb, label: 'Light Control', href: '/devices' },
-  { icon: MapIcon, label: 'Zone Management', href: '/zones' },
-  { icon: BarChart3, label: 'Energy Reports', href: '/reports' },
-  { icon: Bell, label: 'Alerts', href: '/alerts' },
-  { icon: Settings, label: 'System Settings', href: '/settings' },
+  { icon: LayoutDashboard, label: 'หน้าหลัก', href: '/' },
+  { icon: Lightbulb, label: 'ควบคุมโคมไฟ', href: '/devices' },
+  { icon: MapIcon, label: 'จัดการแผนที่/โซน', href: '/zones' },
+  { icon: BarChart3, label: 'รายงานการใช้ไฟ', href: '/reports' },
+  { icon: Bell, label: 'การแจ้งเตือน', href: '/alerts' },
+  { icon: Settings, label: 'ตั้งค่าระบบ', href: '/settings' },
 ];
 
 const Sidebar = () => {
@@ -39,7 +39,7 @@ const Sidebar = () => {
         flexDirection: 'column',
         background: '#ffffff',
         borderRight: '1px solid #f1f5f9',
-        fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+        fontFamily: "var(--font-sarabun), 'Sarabun', sans-serif",
       }}
     >
       {/* Logo */}
@@ -78,7 +78,7 @@ const Sidebar = () => {
               margin: 0,
             }}
           >
-            Smart Phrae
+            สมาร์ทแพร่
           </h1>
           <p
             style={{
@@ -90,7 +90,7 @@ const Sidebar = () => {
               marginTop: '3px',
             }}
           >
-            Lighting Management
+            ระบบจัดการแสงสว่าง
           </p>
         </div>
       </div>
@@ -196,10 +196,10 @@ const Sidebar = () => {
             </div>
             <div>
               <p style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0, lineHeight: 1.2 }}>
-                Admin User
+                ผู้ดูแลระบบ
               </p>
               <p style={{ fontSize: '12px', fontWeight: 500, color: '#94a3b8', margin: 0, marginTop: '2px' }}>
-                Municipality Office
+                เทศบาลเมืองแพร่
               </p>
             </div>
           </div>
@@ -231,7 +231,7 @@ const Sidebar = () => {
             }}
           >
             <LogOut size={14} />
-            Sign Out
+            ออกจากระบบ
           </button>
         </div>
 
@@ -255,7 +255,7 @@ const Sidebar = () => {
                 margin: 0,
               }}
             >
-              System Status
+              สถานะระบบ
             </p>
             <div
               style={{
@@ -277,7 +277,7 @@ const Sidebar = () => {
               margin: 0,
             }}
           >
-            All 1,240 nodes are reporting operational health.
+            กำลังเชื่อมต่อการทำงานโคมไฟ 860 ต้น อย่างสมบูรณ์
           </p>
         </div>
       </div>

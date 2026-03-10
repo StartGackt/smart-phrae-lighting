@@ -4,13 +4,13 @@ import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line } from 'recharts';
 
 const data = [
-    { name: 'Mon', target: 4000, actual: 2400 },
-    { name: 'Tue', target: 3000, actual: 1398 },
-    { name: 'Wed', target: 2000, actual: 5800 },
-    { name: 'Thu', target: 2780, actual: 3908 },
-    { name: 'Fri', target: 1890, actual: 4800 },
-    { name: 'Sat', target: 2390, actual: 3800 },
-    { name: 'Sun', target: 3490, actual: 4300 },
+    { name: 'จ.', target: 4000, actual: 2400 },
+    { name: 'อ.', target: 3000, actual: 1398 },
+    { name: 'พ.', target: 2000, actual: 5800 },
+    { name: 'พฤ.', target: 2780, actual: 3908 },
+    { name: 'ศ.', target: 1890, actual: 4800 },
+    { name: 'ส.', target: 2390, actual: 3800 },
+    { name: 'อา.', target: 3490, actual: 4300 },
 ];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -65,20 +65,20 @@ const EnergyChart = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
                 <div>
                     <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                        Energy Savings Summary
+                        สรุปการประหยัดพลังงาน
                     </h3>
                     <p style={{ fontSize: '13px', fontWeight: 500, color: '#94a3b8', margin: '4px 0 0' }}>
-                        Weekly consumption vs. smart-dimming savings
+                        ปริมาณการใช้ไฟรายสัปดาห์เทียบกับระบบลดแสงอัจฉริยะ
                     </p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <div style={{ width: '10px', height: '10px', borderRadius: '50%', border: '2.5px solid #94a3b8' }} />
-                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>Target</span>
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>เป้าหมาย</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#2563eb' }} />
-                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>Actual</span>
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>ใช้จริง</span>
                     </div>
                 </div>
             </div>
@@ -129,23 +129,23 @@ const EnergyChart = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '24px' }}>
                 <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '20px' }}>
                     <p style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.08em', margin: '0 0 6px' }}>
-                        Weekly Savings
+                        ประหยัดไฟในสัปดาห์นี้
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontSize: '28px', fontWeight: 800, color: '#2563eb', letterSpacing: '-0.02em' }}>-24%</span>
                         <span style={{
                             fontSize: '11px', fontWeight: 600, color: '#2563eb', background: '#dbeafe',
                             padding: '3px 10px', borderRadius: '20px',
-                        }}>Goal reached</span>
+                        }}>ถึงเป้าหมาย</span>
                     </div>
                 </div>
                 <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '20px' }}>
                     <p style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.08em', margin: '0 0 6px' }}>
-                        Carbon Reduction
+                        ลดการปล่อยคาร์บอน
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '28px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
-                            1.2 <span style={{ fontSize: '16px', fontWeight: 500, color: '#94a3b8' }}>tons</span>
+                            1.2 <span style={{ fontSize: '16px', fontWeight: 500, color: '#94a3b8' }}>ตัน</span>
                         </span>
                         <span style={{
                             fontSize: '11px', fontWeight: 600, color: '#64748b', background: '#fff',

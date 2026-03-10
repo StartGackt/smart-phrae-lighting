@@ -19,7 +19,7 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
                 <p style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', margin: '0 0 4px' }}>{label}</p>
                 {payload.map((p: any, i: number) => (
                     <p key={i} style={{ fontSize: '12px', fontWeight: 500, color: p.fill, margin: '2px 0 0' }}>
-                        {p.name === 'before' ? 'Legacy' : 'Smart'}: {p.value.toLocaleString()} kWh
+                        {p.name === 'before' ? 'ระบบเก่า' : 'ระบบใหม่'}: {p.value.toLocaleString()} kWh
                     </p>
                 ))}
             </div>
@@ -43,9 +43,9 @@ export default function ReportsPage() {
     const costSavings = (parseFloat(totalSavingsKw) * 4.5).toFixed(0); // ~4.5 baht per kWh
 
     const headlineCards = [
-        { icon: Zap, label: 'Total Savings', value: `${totalSavingsKw} kW`, sub: `(-${savingsPercent}%)`, subColor: '#059669', desc: `จากเสาไฟ ${controllers.length} ต้น ในระบบ`, gradient: 'linear-gradient(135deg, #2563eb, #1d4ed8)' },
-        { icon: Leaf, label: 'Carbon Offset', value: carbonOffset, sub: 'Tons', subColor: '#0f172a', desc: `CO₂ ลดลงเทียบเท่าป่าไม้ ${Math.round(parseFloat(carbonOffset) * 42)} ต้น`, gradient: 'linear-gradient(135deg, #059669, #047857)' },
-        { icon: DollarSign, label: 'Cost Savings', value: `฿${parseInt(costSavings).toLocaleString()}`, sub: 'MTD', subColor: '#059669', desc: 'ประหยัดค่าไฟฟ้ารวมในเดือนนี้', gradient: 'linear-gradient(135deg, #d97706, #b45309)' },
+        { icon: Zap, label: 'พลังงานที่ประหยัดได้', value: `${totalSavingsKw} kW`, sub: `(-${savingsPercent}%)`, subColor: '#059669', desc: `จากเสาไฟ ${controllers.length} ต้น ในระบบ`, gradient: 'linear-gradient(135deg, #2563eb, #1d4ed8)' },
+        { icon: Leaf, label: 'ลดปริมาณคาร์บอน', value: carbonOffset, sub: 'ตัน', subColor: '#0f172a', desc: `CO₂ ลดลงเทียบเท่าป่าไม้ ${Math.round(parseFloat(carbonOffset) * 42)} ต้น`, gradient: 'linear-gradient(135deg, #059669, #047857)' },
+        { icon: DollarSign, label: 'ประหยัดค่าไฟ', value: `฿${parseInt(costSavings).toLocaleString()}`, sub: 'เดือนนี้', subColor: '#059669', desc: 'ประหยัดค่าไฟฟ้ารวมในเดือนนี้', gradient: 'linear-gradient(135deg, #d97706, #b45309)' },
     ];
 
     // Generate per-month bar chart data based on current power usage
@@ -75,7 +75,7 @@ export default function ReportsPage() {
     const zoneDistribution = topZones;
 
     return (
-        <MainLayout title="Energy Analytics & Savings">
+        <MainLayout title="รายงานการใช้พลังงาน (Energy Analytics)">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                 {/* Headline Cards */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
@@ -111,19 +111,19 @@ export default function ReportsPage() {
                     <div style={{ background: '#fff', borderRadius: '20px', padding: '28px', border: '1px solid #f1f5f9' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
                             <div>
-                                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Consumption Comparison</h3>
+                                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>เปรียบเทียบการใช้พลังงาน</h3>
                                 <p style={{ fontSize: '13px', fontWeight: 500, color: '#94a3b8', margin: '4px 0 0' }}>
-                                    Before vs. After Smart System ({controllers.length} Controllers)
+                                    ก่อนและหลังใช้ระบบอัจฉริยะ (จำนวน {controllers.length} โคมไฟ)
                                 </p>
                             </div>
                             <div style={{ display: 'flex', gap: '16px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: '#e2e8f0' }} />
-                                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' as const }}>Legacy</span>
+                                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' as const }}>ระบบเก่า</span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: '#2563eb' }} />
-                                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' as const }}>Smart</span>
+                                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' as const }}>ระบบใหม่</span>
                                 </div>
                             </div>
                         </div>
@@ -145,7 +145,7 @@ export default function ReportsPage() {
 
                     {/* Pie Chart */}
                     <div style={{ background: '#fff', borderRadius: '20px', padding: '28px', border: '1px solid #f1f5f9' }}>
-                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: '0 0 24px' }}>Energy by Zone</h3>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: '0 0 24px' }}>การใช้พลังงานตามโซน</h3>
                         {mounted && (
                             <div style={{ height: '240px', width: '100%', position: 'relative' }}>
                                 <ResponsiveContainer width="100%" height="100%">
@@ -164,7 +164,7 @@ export default function ReportsPage() {
                                 }}>
                                     <span style={{ fontSize: '32px', fontWeight: 800, color: '#0f172a' }}>{zones.length}</span>
                                     <span style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.06em', textAlign: 'center' }}>
-                                        Zones<br />Total
+                                        โซน<br />ทั้งหมด
                                     </span>
                                 </div>
                             </div>
@@ -210,7 +210,7 @@ export default function ReportsPage() {
                         background: 'rgba(37, 99, 235, 0.15)', filter: 'blur(60px)',
                     }} />
                     <div style={{ position: 'relative', zIndex: 1 }}>
-                        <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>Ready to generate official reports?</h3>
+                        <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>ดาวน์โหลดรายงานแบบทางการ</h3>
                         <p style={{ fontSize: '14px', fontWeight: 500, color: '#94a3b8', margin: 0 }}>
                             ดาวน์โหลดรายงานวิเคราะห์พลังงานสำหรับ {controllers.length} เสาไฟ, {zones.length} โซน
                         </p>
@@ -226,7 +226,7 @@ export default function ReportsPage() {
                             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
                         >
-                            <FileText size={16} /> Export to PDF
+                            <FileText size={16} /> ส่งออกรายงานเป็น PDF
                         </button>
                         <button style={{
                             display: 'flex', alignItems: 'center', gap: '8px',
@@ -238,7 +238,7 @@ export default function ReportsPage() {
                             onMouseEnter={(e) => { e.currentTarget.style.background = '#1d4ed8'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.background = '#2563eb'; }}
                         >
-                            <TableIcon size={16} /> Download Excel (.xlsx)
+                            <TableIcon size={16} /> ดาวน์โหลด Excel (.xlsx)
                         </button>
                     </div>
                 </div>

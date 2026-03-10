@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui;
-  --font-display: var(--font-outfit), ui-sans-serif, system-ui;
+  --font-sans: var(--font-sarabun), ui-sans-serif, system-ui;
+  --font-display: var(--font-sarabun), ui-sans-serif, system-ui;
 }
 
 :root {
@@ -43,7 +43,7 @@
 body {
   background-color: var(--bg-main);
   color: var(--text-primary);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sarabun), 'Sarabun', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

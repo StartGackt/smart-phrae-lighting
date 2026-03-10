@@ -44,7 +44,7 @@ export default function DevicesPage() {
     });
 
     return (
-        <MainLayout title="Light Control">
+        <MainLayout title="ควบคุมโคมไฟ (Light Control)">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 {/* Tab Header */}
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -63,7 +63,7 @@ export default function DevicesPage() {
                         }}
                     >
                         <Cpu size={18} />
-                        Smart Controller Unit
+                        ชุดควบคุมอัจฉริยะ (Smart Controller)
                         <span style={{
                             padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 800,
                             background: activeTab === 'controllers' ? 'rgba(255,255,255,0.2)' : '#f1f5f9',
@@ -85,7 +85,7 @@ export default function DevicesPage() {
                         }}
                     >
                         <Radio size={18} />
-                        Master Gateway
+                        เกตเวย์หลัก (Master Gateway)
                         <span style={{
                             padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 800,
                             background: activeTab === 'gateways' ? 'rgba(255,255,255,0.2)' : '#f1f5f9',
@@ -100,9 +100,9 @@ export default function DevicesPage() {
                         {/* Summary */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
                             {[
-                                { label: 'Active Units', value: `${onlineControllers} / 860`, bg: '#eff6ff', fg: '#2563eb', icon: Cpu },
-                                { label: 'Total Power', value: `${totalPower} kW`, bg: '#ecfdf5', fg: '#059669', icon: Zap },
-                                { label: 'Fault Nodes', value: `${faultCount}`, bg: '#fef2f2', fg: '#dc2626', icon: WifiOff },
+                                { label: 'อุปกรณ์ที่ทำงานอยู่', value: `${onlineControllers} / 860`, bg: '#eff6ff', fg: '#2563eb', icon: Cpu },
+                                { label: 'การใช้ไฟรวม', value: `${totalPower} kW`, bg: '#ecfdf5', fg: '#059669', icon: Zap },
+                                { label: 'ขัดข้อง', value: `${faultCount}`, bg: '#fef2f2', fg: '#dc2626', icon: WifiOff },
                             ].map(s => (
                                 <div key={s.label} style={{
                                     background: '#fff', padding: '22px', borderRadius: '16px', border: '1px solid #f1f5f9',
@@ -125,21 +125,21 @@ export default function DevicesPage() {
                                     fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
                                     boxShadow: '0 8px 24px rgba(37,99,235,0.25)', transition: 'all 0.2s',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontFamily: 'inherit',
-                                }}><Power size={16} /> All On</button>
+                                }}><Power size={16} /> เปิดทั้งหมด</button>
                                 <button onClick={() => toggleAllControllers(false)} style={{
                                     flex: 1, borderRadius: '16px', border: 'none', cursor: 'pointer',
                                     background: '#1e293b', color: '#fff',
                                     fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
                                     boxShadow: '0 8px 24px rgba(0,0,0,0.12)', transition: 'all 0.2s',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontFamily: 'inherit',
-                                }}><PowerOff size={16} /> All Off</button>
+                                }}><PowerOff size={16} /> ปิดทั้งหมด</button>
                             </div>
                         </div>
 
                         {/* Search */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                                Smart Controller Unit — LoRa AS923 (P2P/Mesh) • {zones.length} โซน
+                                ชุดควบคุมอัจฉริยะ (Smart Controller Unit) — LoRa AS923 (P2P/Mesh) • {zones.length} โซน
                             </h3>
                             <div style={{ position: 'relative' }}>
                                 <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
@@ -181,7 +181,7 @@ export default function DevicesPage() {
                                                     Zone {zone.id} — {zone.name}
                                                 </p>
                                                 <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>
-                                                    {zone.onCount}/{zone.total} active • {zone.poles} เสาไฟ
+                                                    {zone.onCount}/{zone.total} กำลังทำงาน • {zone.poles} ต้น
                                                 </p>
                                             </div>
                                         </div>
@@ -212,7 +212,7 @@ export default function DevicesPage() {
                                                     transition: 'all 0.2s',
                                                 }}
                                             >
-                                                {zone.allOn ? 'ON' : 'OFF'}
+                                                {zone.allOn ? 'เปิดทั้งกลุ่ม' : 'ปิดทั้งกลุ่ม'}
                                             </button>
                                         </div>
                                     </div>
@@ -278,9 +278,9 @@ export default function DevicesPage() {
                         {/* Summary */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
                             {[
-                                { label: 'Active Gateways', value: `${onlineGateways} / 20`, bg: '#ecfdf5', fg: '#059669', icon: Radio },
-                                { label: 'Connected Nodes', value: `${totalNodes}`, bg: '#eff6ff', fg: '#2563eb', icon: Signal },
-                                { label: '5G Gateways', value: `${gateways.filter(g => g.cellularType === '5G').length}`, bg: '#f5f3ff', fg: '#7c3aed', icon: Wifi },
+                                { label: 'เกตเวย์ทำงานอยู่', value: `${onlineGateways} / 20`, bg: '#ecfdf5', fg: '#059669', icon: Radio },
+                                { label: 'เครือข่ายลูกข่ายทั้งหมด', value: `${totalNodes}`, bg: '#eff6ff', fg: '#2563eb', icon: Signal },
+                                { label: 'เกตเวย์ 5G', value: `${gateways.filter(g => g.cellularType === '5G').length}`, bg: '#f5f3ff', fg: '#7c3aed', icon: Wifi },
                             ].map(s => (
                                 <div key={s.label} style={{
                                     background: '#fff', padding: '22px', borderRadius: '16px', border: '1px solid #f1f5f9',
@@ -303,19 +303,19 @@ export default function DevicesPage() {
                                     fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
                                     boxShadow: '0 8px 24px rgba(5,150,105,0.25)', transition: 'all 0.2s',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontFamily: 'inherit',
-                                }}><Power size={16} /> All On</button>
+                                }}><Power size={16} /> เปิดทั้งหมด</button>
                                 <button onClick={() => toggleAllGateways(false)} style={{
                                     flex: 1, borderRadius: '16px', border: 'none', cursor: 'pointer',
                                     background: '#1e293b', color: '#fff',
                                     fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
                                     boxShadow: '0 8px 24px rgba(0,0,0,0.12)', transition: 'all 0.2s',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontFamily: 'inherit',
-                                }}><PowerOff size={16} /> All Off</button>
+                                }}><PowerOff size={16} /> ปิดทั้งหมด</button>
                             </div>
                         </div>
 
                         <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                            Master Gateway — LoRa AS923 + 4G/5G Cellular • 20 ชุด
+                            เกตเวย์หลัก (Master Gateway) — LoRa AS923 + 4G/5G Cellular • 20 ชุด
                         </h3>
 
                         {/* Gateway Grid */}
@@ -367,10 +367,10 @@ export default function DevicesPage() {
 
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
                                         {[
-                                            { label: 'Signal', value: `${gw.isOn ? gw.signal : 0}%`, color: gw.signal > 70 ? '#059669' : '#d97706' },
-                                            { label: 'Nodes', value: `${gw.isOn ? gw.connectedNodes : 0}`, color: '#2563eb' },
-                                            { label: 'IP', value: gw.ip, color: '#64748b' },
-                                            { label: 'Uptime', value: gw.isOn ? gw.uptime : '—', color: '#64748b' },
+                                            { label: 'สัญญาณ', value: `${gw.isOn ? gw.signal : 0}%`, color: gw.signal > 70 ? '#059669' : '#d97706' },
+                                            { label: 'ลูกข่าย', value: `${gw.isOn ? gw.connectedNodes : 0}`, color: '#2563eb' },
+                                            { label: 'ไอพี', value: gw.ip, color: '#64748b' },
+                                            { label: 'อัพไทม์', value: gw.isOn ? gw.uptime : '—', color: '#64748b' },
                                         ].map(d => (
                                             <div key={d.label} style={{
                                                 background: '#f8fafc', borderRadius: '10px', padding: '10px', textAlign: 'center',
