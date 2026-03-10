@@ -209,27 +209,28 @@ function generateControllers(): SmartController[] {
 
 
 function generateGateways(): MasterGateway[] {
+    // All 20 gateways placed near actual pole clusters in Phrae city
     const gwData = [
-        { id: 'GW-01', name: 'Gateway ศาลากลาง', location: 'หน้าศาลากลางจังหวัดแพร่', lat: 18.1650, lng: 100.1450, nodes: 85, cell: '5G' as const },
-        { id: 'GW-02', name: 'Gateway ตลาดรองเกสรี', location: 'ถ.น้ำคือ ฝั่งตลาด', lat: 18.1600, lng: 100.1250, nodes: 72, cell: '5G' as const },
-        { id: 'GW-03', name: 'Gateway บ้านทุ่ง', location: 'ซ.บ้านทุ่ง 1', lat: 18.1750, lng: 100.1600, nodes: 45, cell: '4G' as const },
-        { id: 'GW-04', name: 'Gateway ช่อแฮ', location: 'เชิงเขาช่อแฮ', lat: 18.1200, lng: 100.1200, nodes: 38, cell: '4G' as const },
-        { id: 'GW-05', name: 'Gateway วัดจอมสวรรค์', location: 'ถ.รอบเวียง ข้างวัด', lat: 18.1500, lng: 100.1100, nodes: 65, cell: '5G' as const },
-        { id: 'GW-06', name: 'Gateway แพร่-สูงเม่น', location: 'ถ.แพร่-สูงเม่น กม.2', lat: 18.1150, lng: 100.1550, nodes: 58, cell: '4G' as const },
-        { id: 'GW-07', name: 'Gateway เจริญเมือง', location: 'ถ.เจริญเมือง ตอนกลาง', lat: 18.1450, lng: 100.1700, nodes: 52, cell: '5G' as const },
-        { id: 'GW-08', name: 'Gateway ราษฎรบำรุง', location: 'ถ.ราษฎรบำรุง', lat: 18.1350, lng: 100.1050, nodes: 48, cell: '4G' as const },
-        { id: 'GW-09', name: 'Gateway ร่องฟอง', location: 'ซ.ร่องฟอง', lat: 18.1050, lng: 100.1450, nodes: 35, cell: '4G' as const },
-        { id: 'GW-10', name: 'Gateway เหมืองหิต', location: 'ถ.เหมืองหิต-ดอนมูล', lat: 18.0950, lng: 100.1650, nodes: 42, cell: '4G' as const },
-        { id: 'GW-11', name: 'Gateway ป่าแดง', location: 'ซ.ป่าแดง', lat: 18.1850, lng: 100.1800, nodes: 30, cell: '4G' as const },
-        { id: 'GW-12', name: 'Gateway วังหงษ์', location: 'ถ.วังหงษ์', lat: 18.1550, lng: 100.1900, nodes: 28, cell: '4G' as const },
-        { id: 'GW-13', name: 'Gateway มหาไชย', location: 'ถ.มหาไชย', lat: 18.1250, lng: 100.0950, nodes: 25, cell: '4G' as const },
-        { id: 'GW-14', name: 'Gateway ไชยบูรณ์', location: 'ถ.ไชยบูรณ์', lat: 18.1350, lng: 100.1850, nodes: 32, cell: '5G' as const },
-        { id: 'GW-15', name: 'Gateway บ้านกวาว', location: 'ถ.บ้านกวาว', lat: 18.0850, lng: 100.1250, nodes: 22, cell: '4G' as const },
-        { id: 'GW-16', name: 'Gateway ทุ่งโฮ้ง', location: 'บ้านทุ่งโฮ้ง', lat: 18.0750, lng: 100.1500, nodes: 35, cell: '4G' as const },
-        { id: 'GW-17', name: 'Gateway น้ำชำ', location: 'บ้านน้ำชำ', lat: 18.0800, lng: 100.1850, nodes: 20, cell: '4G' as const },
-        { id: 'GW-18', name: 'Gateway พญาพล', location: 'ถ.พญาพล', lat: 18.1000, lng: 100.1250, nodes: 28, cell: '4G' as const },
-        { id: 'GW-19', name: 'Gateway แม่จั๊ว', location: 'ถ.แม่จั๊ว', lat: 18.0900, lng: 100.1750, nodes: 24, cell: '4G' as const },
-        { id: 'GW-20', name: 'Gateway สวนสุขภาพ', location: 'สวนสุขภาพเทศบาล', lat: 18.1100, lng: 100.1000, nodes: 18, cell: '5G' as const },
+        { id: 'GW-01', name: 'Gateway เจริญเมือง (เหนือ)', location: 'ถ.เจริญเมือง ตอนบน', lat: 18.1520, lng: 100.1373, nodes: 47, cell: '5G' as const },
+        { id: 'GW-02', name: 'Gateway เจริญเมือง (กลาง)', location: 'ถ.เจริญเมือง ตอนกลาง', lat: 18.1465, lng: 100.1393, nodes: 51, cell: '5G' as const },
+        { id: 'GW-03', name: 'Gateway เจริญเมือง (ใต้)', location: 'ถ.เจริญเมือง ตอนล่าง', lat: 18.1425, lng: 100.1423, nodes: 44, cell: '5G' as const },
+        { id: 'GW-04', name: 'Gateway ยันตรกิจโกศล (เหนือ)', location: 'ถ.ยันตรกิจโกศล ตอนบน', lat: 18.1459, lng: 100.1471, nodes: 48, cell: '4G' as const },
+        { id: 'GW-05', name: 'Gateway ยันตรกิจโกศล (ใต้)', location: 'ถ.ยันตรกิจโกศล ตอนล่าง', lat: 18.1412, lng: 100.1503, nodes: 44, cell: '4G' as const },
+        { id: 'GW-06', name: 'Gateway น้ำคือ', location: 'ถ.น้ำคือ / ตลาดรองเกสรี', lat: 18.1451, lng: 100.1443, nodes: 40, cell: '5G' as const },
+        { id: 'GW-07', name: 'Gateway ไชยบูรณ์', location: 'ถ.ไชยบูรณ์ / ถ.รอบเวียงเหนือ', lat: 18.1481, lng: 100.1422, nodes: 53, cell: '5G' as const },
+        { id: 'GW-08', name: 'Gateway พระร่วง', location: 'ถ.พระร่วง ใกล้วัดศรีชุม', lat: 18.1420, lng: 100.1387, nodes: 65, cell: '4G' as const },
+        { id: 'GW-09', name: 'Gateway ชุมพล', location: 'ถ.ชุมพล / ถ.เมืองหิต', lat: 18.1393, lng: 100.1441, nodes: 58, cell: '4G' as const },
+        { id: 'GW-10', name: 'Gateway ราษฎรบำรุง', location: 'ถ.ราษฎรบำรุง ซ.บ้านกวาว', lat: 18.1391, lng: 100.1390, nodes: 60, cell: '4G' as const },
+        { id: 'GW-11', name: 'Gateway รอบเวียง (ใต้)', location: 'ถ.รอบเวียง ใต้ / ถ.แพร่-สูงเม่น', lat: 18.1438, lng: 100.1393, nodes: 56, cell: '5G' as const },
+        { id: 'GW-12', name: 'Gateway บ้านทุ่ง', location: 'ซ.บ้านทุ่ง / ซ.ป่าแดง', lat: 18.1509, lng: 100.1596, nodes: 47, cell: '4G' as const },
+        { id: 'GW-13', name: 'Gateway วังหงษ์', location: 'ถ.วังหงษ์', lat: 18.1478, lng: 100.1583, nodes: 20, cell: '4G' as const },
+        { id: 'GW-14', name: 'Gateway มหาไชย', location: 'ถ.มหาไชย / เชตวัน', lat: 18.1420, lng: 100.1318, nodes: 30, cell: '4G' as const },
+        { id: 'GW-15', name: 'Gateway วัดศรีชุม', location: 'ซ.วัดศรีชุม / พระนอนเหนือ', lat: 18.1445, lng: 100.1352, nodes: 28, cell: '4G' as const },
+        { id: 'GW-16', name: 'Gateway เหมืองแดง', location: 'ถ.เหมืองแดง / วัดจอมสวรรค์', lat: 18.1404, lng: 100.1495, nodes: 44, cell: '4G' as const },
+        { id: 'GW-17', name: 'Gateway ร่องฟอง', location: 'ซ.ร่องฟอง / ถ.เมืองฮิต', lat: 18.1360, lng: 100.1482, nodes: 65, cell: '4G' as const },
+        { id: 'GW-18', name: 'Gateway พญาพล', location: 'ถ.พญาพล / ร่องซ้อ', lat: 18.1375, lng: 100.1410, nodes: 40, cell: '4G' as const },
+        { id: 'GW-19', name: 'Gateway สวนสุขภาพ', location: 'สวนสุขภาพเทศบาล / ถ.ทุ่งโฮ้ง', lat: 18.1387, lng: 100.1520, nodes: 34, cell: '5G' as const },
+        { id: 'GW-20', name: 'Gateway น้ำทอง', location: 'บ้านน้ำชำ / น้ำทอง-บายพาส', lat: 18.1295, lng: 100.1578, nodes: 20, cell: '4G' as const },
     ];
 
     return gwData.map((g, i) => ({
