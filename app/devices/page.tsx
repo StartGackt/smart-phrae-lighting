@@ -3,27 +3,69 @@
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import DeviceCard from '@/components/devices/DeviceCard';
-import { Zap, ShieldCheck, AlertCircle, Grid, List as ListIcon, Filter } from 'lucide-react';
+import { Zap, ShieldCheck, AlertCircle, Grid, List as ListIcon, Filter, Power, PowerOff } from 'lucide-react';
 
-const devices = [
-    { id: '1', name: 'Charoen Muang Road', units: 85, status: 'Online', consumption: '2.8', intensity: 85 },
-    { id: '2', name: 'Phra Ruang Road', units: 45, status: 'Warning', consumption: '0.0', intensity: 0 },
-    { id: '3', name: 'Chumphon Road', units: 64, status: 'Online', consumption: '2.1', intensity: 100 },
-    { id: '4', name: 'Kham Lue Road', units: 92, status: 'Online', consumption: '3.2', intensity: 85 },
-    { id: '5', name: 'Chaiyabun Road', units: 78, status: 'Online', consumption: '2.6', intensity: 100 },
-    { id: '6', name: 'Nam Kue Road', units: 102, status: 'Online', consumption: '3.5', intensity: 100 },
-    { id: '7', name: 'Muang Hit Road', units: 55, status: 'Online', consumption: '1.8', intensity: 100 },
-    { id: '8', name: 'Phrae-Sung Men Rd', units: 210, status: 'Online', consumption: '7.4', intensity: 100 },
-    { id: '9', name: 'Rong Kasery Mkt', units: 34, status: 'Offline', consumption: '0.0', intensity: 0 },
-];
+interface Device {
+    id: string;
+    name: string;
+    units: number;
+    status: 'Online' | 'Offline' | 'Warning';
+    consumption: string;
+    intensity: number;
+    isOn: boolean;
+}
 
-const summaryCards = [
-    { icon: Zap, label: 'Active Consumption', value: '185 kW', bg: '#eff6ff', fg: '#2563eb' },
-    { icon: ShieldCheck, label: 'Online Nodes', value: '842 / 860', bg: '#ecfdf5', fg: '#059669' },
-    { icon: AlertCircle, label: 'Fault Alerts', value: '2 Critical', bg: '#fef2f2', fg: '#dc2626' },
+const initialDevices: Device[] = [
+    { id: '1', name: 'Charoen Muang Road', units: 85, status: 'Online', consumption: '2.8', intensity: 85, isOn: true },
+    { id: '2', name: 'Phra Ruang Road', units: 45, status: 'Warning', consumption: '0.0', intensity: 0, isOn: true },
+    { id: '3', name: 'Chumphon Road', units: 64, status: 'Online', consumption: '2.1', intensity: 100, isOn: true },
+    { id: '4', name: 'Kham Lue Road', units: 92, status: 'Online', consumption: '3.2', intensity: 85, isOn: true },
+    { id: '5', name: 'Chaiyabun Road', units: 78, status: 'Online', consumption: '2.6', intensity: 100, isOn: true },
+    { id: '6', name: 'Nam Kue Road', units: 102, status: 'Online', consumption: '3.5', intensity: 100, isOn: true },
+    { id: '7', name: 'Muang Hit Road', units: 55, status: 'Online', consumption: '1.8', intensity: 100, isOn: true },
+    { id: '8', name: 'Phrae-Sung Men Rd', units: 210, status: 'Online', consumption: '7.4', intensity: 100, isOn: true },
+    { id: '9', name: 'Rong Kasery Mkt', units: 34, status: 'Offline', consumption: '0.0', intensity: 0, isOn: false },
 ];
 
 export default function DevicesPage() {
+    const [devices, setDevices] = React.useState<Device[]>(initialDevices);
+
+    const handleToggle = (id: string) => {
+        setDevices(prev => prev.map(d => {
+            if (d.id === id && d.status !== 'Offline') {
+                return { ...d, isOn: !d.isOn };
+            }
+            return d;
+        }));
+    };
+
+    const handleIntensityChange = (id: string, value: number) => {
+        setDevices(prev => prev.map(d => d.id === id ? { ...d, intensity: value } : d));
+    };
+
+    const handleAllOn = () => {
+        setDevices(prev => prev.map(d => d.status !== 'Offline' ? { ...d, isOn: true } : d));
+    };
+
+    const handleAllOff = () => {
+        setDevices(prev => prev.map(d => d.status !== 'Offline' ? { ...d, isOn: false } : d));
+    };
+
+    // Computed stats
+    const onlineCount = devices.filter(d => d.isOn && d.status !== 'Offline').length;
+    const totalCount = devices.length;
+    const totalConsumption = devices
+        .filter(d => d.isOn)
+        .reduce((sum, d) => sum + parseFloat(d.consumption), 0)
+        .toFixed(1);
+    const faultCount = devices.filter(d => d.status === 'Warning').length;
+
+    const summaryCards = [
+        { icon: Zap, label: 'Active Consumption', value: `${totalConsumption} kW`, bg: '#eff6ff', fg: '#2563eb' },
+        { icon: ShieldCheck, label: 'Online Nodes', value: `${onlineCount} / ${totalCount}`, bg: '#ecfdf5', fg: '#059669' },
+        { icon: AlertCircle, label: 'Fault Alerts', value: `${faultCount} Critical`, bg: '#fef2f2', fg: '#dc2626' },
+    ];
+
     return (
         <MainLayout title="Light Control">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -50,18 +92,36 @@ export default function DevicesPage() {
                         </div>
                     ))}
                     <div style={{ display: 'flex', gap: '8px' }}>
-                        <button style={{
-                            flex: 1, borderRadius: '16px', border: 'none', cursor: 'pointer',
-                            background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#fff',
-                            fontSize: '13px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.06em',
-                            boxShadow: '0 8px 24px rgba(37,99,235,0.25)', transition: 'all 0.2s',
-                        }}>All On</button>
-                        <button style={{
-                            flex: 1, borderRadius: '16px', border: 'none', cursor: 'pointer',
-                            background: '#1e293b', color: '#fff',
-                            fontSize: '13px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.06em',
-                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)', transition: 'all 0.2s',
-                        }}>All Off</button>
+                        <button
+                            onClick={handleAllOn}
+                            style={{
+                                flex: 1, borderRadius: '16px', border: 'none', cursor: 'pointer',
+                                background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#fff',
+                                fontSize: '13px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.06em',
+                                boxShadow: '0 8px 24px rgba(37,99,235,0.25)', transition: 'all 0.2s',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                fontFamily: 'inherit',
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                        >
+                            <Power size={16} /> All On
+                        </button>
+                        <button
+                            onClick={handleAllOff}
+                            style={{
+                                flex: 1, borderRadius: '16px', border: 'none', cursor: 'pointer',
+                                background: '#1e293b', color: '#fff',
+                                fontSize: '13px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.06em',
+                                boxShadow: '0 8px 24px rgba(0,0,0,0.12)', transition: 'all 0.2s',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                fontFamily: 'inherit',
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                        >
+                            <PowerOff size={16} /> All Off
+                        </button>
                     </div>
                 </div>
 
@@ -90,7 +150,7 @@ export default function DevicesPage() {
                             display: 'flex', alignItems: 'center', gap: '6px',
                             padding: '8px 16px', borderRadius: '10px', border: '1px solid #f1f5f9',
                             background: '#fff', color: '#64748b', fontSize: '13px', fontWeight: 600,
-                            cursor: 'pointer',
+                            cursor: 'pointer', fontFamily: 'inherit',
                         }}><Filter size={16} /> Filter</button>
                     </div>
                 </div>
@@ -104,9 +164,12 @@ export default function DevicesPage() {
                             name={d.name}
                             location="Main Road"
                             units={d.units}
-                            status={d.status as any}
+                            status={d.status}
                             consumption={d.consumption}
                             intensity={d.intensity}
+                            isOn={d.isOn}
+                            onToggle={handleToggle}
+                            onIntensityChange={handleIntensityChange}
                         />
                     ))}
                 </div>
