@@ -7,6 +7,7 @@ import {
     Wifi, WifiOff, CheckCircle2, AlertTriangle, Settings as SettingsIcon,
     ChevronRight, Bell
 } from 'lucide-react';
+import { useDevices } from '@/contexts/DeviceContext';
 
 type TabId = 'users' | 'thresholds' | 'gateways' | 'notifications';
 
@@ -31,13 +32,6 @@ const initialThresholds = {
     tiltAngle: 10, tiltUnit: '°',
 };
 
-const initialGateways = [
-    { id: 'GW-01', name: 'Gateway ศาลากลาง', location: 'อ.เมืองแพร่', ip: '192.168.1.101', status: 'online' as const, signal: 95, nodes: 320, firmware: 'v2.4.1', lastSeen: '1 min ago' },
-    { id: 'GW-02', name: 'Gateway ตลาดรองเกสรี', location: 'ถ.น้ำคือ', ip: '192.168.1.102', status: 'online' as const, signal: 88, nodes: 285, firmware: 'v2.4.1', lastSeen: '2 min ago' },
-    { id: 'GW-03', name: 'Gateway บ้านทุ่ง', location: 'ซ.บ้านทุ่ง', ip: '192.168.1.103', status: 'online' as const, signal: 92, nodes: 195, firmware: 'v2.4.0', lastSeen: '1 min ago' },
-    { id: 'GW-04', name: 'Gateway ช่อแฮ', location: 'ถ.ช่อแฮ', ip: '192.168.1.104', status: 'warning' as const, signal: 45, nodes: 60, firmware: 'v2.3.5', lastSeen: '15 min ago' },
-];
-
 const roleColors: Record<string, { bg: string; fg: string }> = {
     Admin: { bg: '#eff6ff', fg: '#2563eb' },
     Technician: { bg: '#ecfdf5', fg: '#059669' },
@@ -52,7 +46,9 @@ const tabs: { id: TabId; label: string; icon: React.ComponentType<any> }[] = [
 ];
 
 export default function SettingsPage() {
+    const { gateways, controllers, toggleController } = useDevices();
     const [activeTab, setActiveTab] = React.useState<TabId>('users');
+    const [expandedGateway, setExpandedGateway] = React.useState<string | null>(null);
     const [users] = React.useState(initialUsers);
     const [thresholds, setThresholds] = React.useState(initialThresholds);
     const [saved, setSaved] = React.useState(false);
@@ -273,55 +269,113 @@ export default function SettingsPage() {
                                     <div style={{
                                         padding: '8px 16px', borderRadius: '10px', background: '#ecfdf5',
                                         fontSize: '13px', fontWeight: 700, color: '#059669',
-                                    }}>🟢 Online: {initialGateways.filter(g => g.status === 'online').length}</div>
+                                    }}>🟢 Online: {gateways.filter(g => g.status === 'online').length}</div>
                                     <div style={{
                                         padding: '8px 16px', borderRadius: '10px', background: '#fffbeb',
                                         fontSize: '13px', fontWeight: 700, color: '#d97706',
-                                    }}>🟡 Warning: {initialGateways.filter(g => g.status === 'warning').length}</div>
+                                    }}>🟡 Warning: {gateways.filter(g => g.status === 'warning').length}</div>
                                 </div>
                             </div>
 
-                            {initialGateways.map(gw => (
-                                <div key={gw.id} style={{
-                                    background: '#fff', borderRadius: '16px', border: `1px solid ${gw.status === 'warning' ? '#fde68a' : '#f1f5f9'}`,
-                                    padding: '24px', display: 'flex', alignItems: 'center', gap: '20px',
-                                }}>
-                                    <div style={{
-                                        width: '52px', height: '52px', borderRadius: '14px', flexShrink: 0,
-                                        background: gw.status === 'online' ? '#ecfdf5' : '#fffbeb',
-                                        color: gw.status === 'online' ? '#059669' : '#d97706',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    }}>
-                                        <Radio size={24} />
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                                {gateways.map(gw => (
+                                    <div key={gw.id} style={{
+                                        background: '#fff', borderRadius: '16px', border: `1px solid ${gw.status === 'warning' ? '#fde68a' : '#f1f5f9'}`,
+                                        padding: '24px', transition: 'all 0.3s',
+                                        gridColumn: expandedGateway === gw.id ? 'span 2' : 'span 1',
+                                        cursor: 'pointer',
+                                    }} onClick={() => setExpandedGateway(expandedGateway === gw.id ? null : gw.id)}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                            <div style={{
+                                                width: '52px', height: '52px', borderRadius: '14px', flexShrink: 0,
+                                                background: gw.status === 'online' ? '#ecfdf5' : '#fffbeb',
+                                                color: gw.status === 'online' ? '#059669' : '#d97706',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            }}>
+                                                <Radio size={24} />
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', margin: 0 }}>{gw.name}</h4>
+                                                    <span style={{
+                                                        fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px',
+                                                        background: gw.status === 'online' ? '#dcfce7' : '#fef3c7',
+                                                        color: gw.status === 'online' ? '#15803d' : '#b45309',
+                                                        textTransform: 'uppercase',
+                                                    }}>{gw.status}</span>
+                                                </div>
+                                                <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>{gw.location} • IP: {gw.ip} • FW: {gw.firmware}</p>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '24px', textAlign: 'center' }}>
+                                                <div>
+                                                    <p style={{ fontSize: '18px', fontWeight: 800, color: gw.signal > 70 ? '#059669' : '#d97706', margin: 0 }}>{gw.signal}%</p>
+                                                    <p style={{ fontSize: '10px', fontWeight: 600, color: '#94a3b8', margin: '1px 0 0' }}>Signal</p>
+                                                </div>
+                                                <div>
+                                                    <p style={{ fontSize: '18px', fontWeight: 800, color: '#2563eb', margin: 0 }}>{gw.connectedNodes}</p>
+                                                    <p style={{ fontSize: '10px', fontWeight: 600, color: '#94a3b8', margin: '1px 0 0' }}>Nodes</p>
+                                                </div>
+                                                <div>
+                                                    <p style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', margin: 0 }}>{gw.uptime}</p>
+                                                    <p style={{ fontSize: '10px', fontWeight: 600, color: '#94a3b8', margin: '1px 0 0' }}>Uptime</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Expanded Controllers for Gateway */}
+                                        {expandedGateway === gw.id && (
+                                            <div onClick={(e) => e.stopPropagation()} style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #f1f5f9', cursor: 'default' }}>
+                                                <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginBottom: '12px' }}>
+                                                    โคมไฟอัจฉริยะในเครือข่ายนี้ (ดึงข้อมูลล่าสุด)
+                                                </h4>
+                                                <div style={{
+                                                    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                                                    gap: '10px'
+                                                }}>
+                                                    {controllers.filter(c => gw.zoneIds.includes(c.zoneId)).map(ctrl => (
+                                                        <div key={ctrl.id} style={{
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                            padding: '12px 14px', borderRadius: '12px',
+                                                            background: ctrl.isOn ? '#f8fafc' : '#fafafa',
+                                                            border: ctrl.status === 'fault' ? '1px solid #fecaca' : '1px solid #f1f5f9',
+                                                        }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                                <div style={{
+                                                                    width: '8px', height: '8px', borderRadius: '50%',
+                                                                    background: ctrl.status === 'fault' ? '#ef4444' : ctrl.isOn ? '#22c55e' : '#cbd5e1',
+                                                                }} />
+                                                                <div>
+                                                                    <p style={{ fontSize: '12px', fontWeight: 700, color: '#334155', margin: 0 }}>{ctrl.id}</p>
+                                                                    <p style={{ fontSize: '10px', color: '#94a3b8', margin: '1px 0 0' }}>
+                                                                        {ctrl.zone} • {ctrl.voltage}V • {ctrl.power}kW
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <label style={{ position: 'relative', cursor: ctrl.status === 'fault' ? 'not-allowed' : 'pointer' }}>
+                                                                <input type="checkbox" checked={ctrl.isOn}
+                                                                    onChange={(e) => { e.stopPropagation(); toggleController(ctrl.id); }}
+                                                                    style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }}
+                                                                />
+                                                                <div style={{
+                                                                    width: '36px', height: '20px', borderRadius: '10px',
+                                                                    background: ctrl.isOn ? '#2563eb' : '#e2e8f0',
+                                                                    transition: 'background 0.25s', position: 'relative',
+                                                                }}>
+                                                                    <div style={{
+                                                                        width: '16px', height: '16px', borderRadius: '50%', background: '#fff',
+                                                                        position: 'absolute', top: '2px', left: ctrl.isOn ? '18px' : '2px',
+                                                                        transition: 'left 0.25s', boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                                                                    }} />
+                                                                </div>
+                                                            </label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                            <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', margin: 0 }}>{gw.name}</h4>
-                                            <span style={{
-                                                fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px',
-                                                background: gw.status === 'online' ? '#dcfce7' : '#fef3c7',
-                                                color: gw.status === 'online' ? '#15803d' : '#b45309',
-                                                textTransform: 'uppercase',
-                                            }}>{gw.status}</span>
-                                        </div>
-                                        <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>{gw.location} • IP: {gw.ip} • FW: {gw.firmware}</p>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '24px', textAlign: 'center' }}>
-                                        <div>
-                                            <p style={{ fontSize: '18px', fontWeight: 800, color: gw.signal > 70 ? '#059669' : '#d97706', margin: 0 }}>{gw.signal}%</p>
-                                            <p style={{ fontSize: '10px', fontWeight: 600, color: '#94a3b8', margin: '1px 0 0' }}>Signal</p>
-                                        </div>
-                                        <div>
-                                            <p style={{ fontSize: '18px', fontWeight: 800, color: '#2563eb', margin: 0 }}>{gw.nodes}</p>
-                                            <p style={{ fontSize: '10px', fontWeight: 600, color: '#94a3b8', margin: '1px 0 0' }}>Nodes</p>
-                                        </div>
-                                        <div>
-                                            <p style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', margin: 0 }}>{gw.lastSeen}</p>
-                                            <p style={{ fontSize: '10px', fontWeight: 600, color: '#94a3b8', margin: '1px 0 0' }}>Last Seen</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     )}
 

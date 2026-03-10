@@ -155,9 +155,55 @@ const ZoneMap = ({
                                         background: g.isOn ? '#fef2f2' : '#ecfdf5',
                                         color: g.isOn ? '#dc2626' : '#059669',
                                         fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', width: '100%',
-                                        marginTop: '4px',
+                                        marginTop: '4px', marginBottom: '12px',
                                     }}
                                 >{g.isOn ? '🔴 ปิด Gateway' : '🟢 เปิด Gateway'}</button>
+
+                                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
+                                    <p style={{ fontSize: '11px', fontWeight: 700, color: '#334155', marginBottom: '6px', margin: 0 }}>
+                                        ลูกข่ายที่เชื่อมต่อ ({controllers.filter(c => g.zoneIds.includes(c.zoneId)).length} ชุด)
+                                    </p>
+                                    <div style={{
+                                        maxHeight: '130px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px',
+                                        paddingRight: '4px'
+                                    }}>
+                                        {controllers.filter(c => g.zoneIds.includes(c.zoneId)).map(ctrl => (
+                                            <div key={ctrl.id} style={{
+                                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                                background: ctrl.isOn ? '#f8fafc' : '#f1f5f9', borderRadius: '6px', padding: '6px',
+                                                border: ctrl.status === 'fault' ? '1px solid #fecaca' : '1px solid transparent'
+                                            }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <div style={{
+                                                        width: '6px', height: '6px', borderRadius: '50%',
+                                                        background: ctrl.status === 'fault' ? '#ef4444' : ctrl.isOn ? '#22c55e' : '#cbd5e1'
+                                                    }} />
+                                                    <div>
+                                                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#0f172a', display: 'block' }}>{ctrl.id}</span>
+                                                        <span style={{ fontSize: '9px', color: '#64748b' }}>{ctrl.voltage}V • {ctrl.power}kW</span>
+                                                    </div>
+                                                </div>
+                                                <label style={{ position: 'relative', cursor: ctrl.status === 'fault' ? 'not-allowed' : 'pointer' }} onClick={e => e.stopPropagation()}>
+                                                    <input type="checkbox" checked={ctrl.isOn}
+                                                        onChange={() => onToggleController(ctrl.id)}
+                                                        style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }}
+                                                    />
+                                                    <div style={{
+                                                        width: '24px', height: '14px', borderRadius: '7px',
+                                                        background: ctrl.isOn ? '#2563eb' : '#cbd5e1',
+                                                        transition: 'background 0.2s', position: 'relative',
+                                                    }}>
+                                                        <div style={{
+                                                            width: '10px', height: '10px', borderRadius: '50%', background: '#fff',
+                                                            position: 'absolute', top: '2px', left: ctrl.isOn ? '12px' : '2px',
+                                                            transition: 'left 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                                                        }} />
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </Popup>
                     </CircleMarker>

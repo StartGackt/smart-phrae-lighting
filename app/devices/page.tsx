@@ -20,7 +20,10 @@ export default function DevicesPage() {
 
     const [activeTab, setActiveTab] = React.useState<TabId>('controllers');
     const [expandedZone, setExpandedZone] = React.useState<number | null>(null);
+    const [expandedGateway, setExpandedGateway] = React.useState<string | null>(null);
     const [searchQuery, setSearchQuery] = React.useState('');
+    const [zoneDimming, setZoneDimming] = React.useState<Record<number, number>>({});
+    const [zoneSchedule, setZoneSchedule] = React.useState<Record<number, { on: string, off: string }>>({});
 
     // Controller stats
     const onlineControllers = controllers.filter(c => c.isOn && c.status !== 'fault').length;
@@ -220,9 +223,52 @@ export default function DevicesPage() {
                                     {/* Expanded Node list */}
                                     {expandedZone === zone.id && (
                                         <div style={{ padding: '0 20px 16px', borderTop: '1px solid #f8fafc' }}>
+                                            {/* Dimming and Scheduling UI for Zone */}
+                                            <div style={{
+                                                display: 'flex', gap: '24px', padding: '16px', marginTop: '16px',
+                                                background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0',
+                                            }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>ปรับระดับความสว่าง (Dimming)</span>
+                                                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#2563eb' }}>{zoneDimming[zone.id] || 100}%</span>
+                                                    </div>
+                                                    <input
+                                                        type="range" min="0" max="100"
+                                                        value={zoneDimming[zone.id] || 100}
+                                                        onChange={(e) => setZoneDimming(prev => ({ ...prev, [zone.id]: parseInt(e.target.value) }))}
+                                                        style={{ width: '100%', cursor: 'pointer', accentColor: '#2563eb' }}
+                                                    />
+                                                </div>
+                                                <div style={{ width: '1px', background: '#cbd5e1' }} />
+                                                <div style={{ flex: 1.5, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>ตั้งเวลาเปิด-ปิดอัตโนมัติ (Scheduling)</span>
+                                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <span style={{ fontSize: '12px', color: '#64748b' }}>เปิด:</span>
+                                                            <input type="time"
+                                                                value={zoneSchedule[zone.id]?.on || "18:00"}
+                                                                onChange={(e) => setZoneSchedule(prev => ({ ...prev, [zone.id]: { on: e.target.value, off: prev[zone.id]?.off || "06:00" } }))}
+                                                                style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px', color: '#0f172a' }} />
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <span style={{ fontSize: '12px', color: '#64748b' }}>ปิด:</span>
+                                                            <input type="time"
+                                                                value={zoneSchedule[zone.id]?.off || "06:00"}
+                                                                onChange={(e) => setZoneSchedule(prev => ({ ...prev, [zone.id]: { on: prev[zone.id]?.on || "18:00", off: e.target.value } }))}
+                                                                style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px', color: '#0f172a' }} />
+                                                        </div>
+                                                        <button style={{
+                                                            padding: '6px 12px', borderRadius: '6px', border: 'none', background: '#e0e7ff', color: '#4338ca',
+                                                            fontSize: '11px', fontWeight: 700, cursor: 'pointer',
+                                                        }}>บันทึกเวลา</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <div style={{
                                                 display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                                                gap: '10px', marginTop: '12px',
+                                                gap: '10px', marginTop: '16px',
                                             }}>
                                                 {zone.controllers.map(ctrl => (
                                                     <div key={ctrl.id} style={{
@@ -325,7 +371,9 @@ export default function DevicesPage() {
                                     background: '#fff', borderRadius: '16px',
                                     border: gw.status === 'warning' ? '1px solid #fde68a' : '1px solid #f1f5f9',
                                     padding: '22px', opacity: gw.isOn ? 1 : 0.55, transition: 'all 0.3s',
-                                }}>
+                                    gridColumn: expandedGateway === gw.id ? 'span 2' : 'span 1',
+                                    cursor: 'pointer',
+                                }} onClick={() => setExpandedGateway(expandedGateway === gw.id ? null : gw.id)}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                             <div style={{
@@ -346,7 +394,7 @@ export default function DevicesPage() {
                                                 background: gw.cellularType === '5G' ? '#f5f3ff' : '#f8fafc',
                                                 color: gw.cellularType === '5G' ? '#7c3aed' : '#64748b',
                                             }}>{gw.cellularType}</span>
-                                            <label style={{ cursor: 'pointer' }}>
+                                            <label style={{ cursor: 'pointer' }} onClick={(e) => e.stopPropagation()}>
                                                 <input type="checkbox" checked={gw.isOn} onChange={() => toggleGateway(gw.id)}
                                                     style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }}
                                                 />
@@ -380,6 +428,59 @@ export default function DevicesPage() {
                                             </div>
                                         ))}
                                     </div>
+
+                                    {/* Expanded Controllers for Gateway */}
+                                    {expandedGateway === gw.id && (
+                                        <div onClick={(e) => e.stopPropagation()} style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #f1f5f9', cursor: 'default' }}>
+                                            <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginBottom: '12px' }}>
+                                                โคมไฟอัจฉริยะที่เชื่อมต่อกับ {gw.name} (ในพื้นที่ {gw.zoneIds.length} โซน)
+                                            </h4>
+                                            <div style={{
+                                                display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                                                gap: '10px'
+                                            }}>
+                                                {controllers.filter(c => gw.zoneIds.includes(c.zoneId)).map(ctrl => (
+                                                    <div key={ctrl.id} style={{
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                        padding: '12px 14px', borderRadius: '12px',
+                                                        background: ctrl.isOn ? '#f8fafc' : '#fafafa',
+                                                        border: ctrl.status === 'fault' ? '1px solid #fecaca' : '1px solid #f1f5f9',
+                                                    }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                            <div style={{
+                                                                width: '8px', height: '8px', borderRadius: '50%',
+                                                                background: ctrl.status === 'fault' ? '#ef4444' : ctrl.isOn ? '#22c55e' : '#cbd5e1',
+                                                            }} />
+                                                            <div>
+                                                                <p style={{ fontSize: '12px', fontWeight: 700, color: '#334155', margin: 0 }}>{ctrl.id}</p>
+                                                                <p style={{ fontSize: '10px', color: '#94a3b8', margin: '1px 0 0' }}>
+                                                                    {ctrl.zone} • {ctrl.voltage}V • {ctrl.power}kW
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <label style={{ position: 'relative', cursor: ctrl.status === 'fault' ? 'not-allowed' : 'pointer' }}>
+                                                            <input type="checkbox" checked={ctrl.isOn}
+                                                                onChange={(e) => { e.stopPropagation(); toggleController(ctrl.id); }}
+                                                                style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }}
+                                                            />
+                                                            <div style={{
+                                                                width: '36px', height: '20px', borderRadius: '10px',
+                                                                background: ctrl.isOn ? '#2563eb' : '#e2e8f0',
+                                                                transition: 'background 0.25s', position: 'relative',
+                                                            }}>
+                                                                <div style={{
+                                                                    width: '16px', height: '16px', borderRadius: '50%', background: '#fff',
+                                                                    position: 'absolute', top: '2px', left: ctrl.isOn ? '18px' : '2px',
+                                                                    transition: 'left 0.25s', boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                                                                }} />
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
                                 </div>
                             ))}
                         </div>

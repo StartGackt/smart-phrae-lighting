@@ -42,13 +42,13 @@ export default function Dashboard() {
             color="green"
           />
           <StatCard
-            title="กำลังไฟ"
-            value={totalPower}
-            subValue="kW"
-            description="ปริมาณการใช้ไฟรวมขณะนี้"
+            title="การใช้ไฟวันนี้"
+            value={(parseFloat(totalPower) * 5.4).toFixed(1)}
+            subValue="kWh"
+            description="ปริมาณพลังงานสะสมในวันนี้"
             icon={Zap}
             color="orange"
-            trend={{ value: `สว่างอยู่ ${controllers.filter(c => c.isOn).length} ต้น`, isUp: true }}
+            trend={{ value: `โหลดปัจจุบัน ${totalPower} kW`, isUp: true }}
           />
           <StatCard
             title="แจ้งซ่อม/เฝ้าระวัง"
